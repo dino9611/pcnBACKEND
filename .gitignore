@@ -1,0 +1,11 @@
+# ignore node_modules
+node_modules/
+
+# ignore distribution folder
+dist/
+
+# ignore environment variable
+.env
+
+# ignore sequelize config file 
+src/database/config/config.json

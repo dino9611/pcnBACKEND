@@ -1,0 +1,8 @@
+{
+  "extends": "es/2015/server",
+  "rules": {
+    "no-process-env": "off",
+    "no-sync": "off",
+    "strict": "off"
+  }
+}
