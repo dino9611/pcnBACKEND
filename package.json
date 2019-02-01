@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --exec babel-node src/index.js",
     "build": "babel src —-out-dir dist",
-    "server": "node dist/index.js"
+    "server": "node dist/index.js",
+    "migrate": "cd src/database && sequelize db:migrate",
+    "undo-migration": "cd src/database && sequelize db:migrate:undo",
+    "deep-undo-migration": "cd src/database && sequelize db:migrate:undo:all"
   },
   "repository": {
     "type": "git",

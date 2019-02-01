@@ -9,3 +9,5 @@ dist/
 
 # ignore sequelize config file 
 src/database/config/config.json
+
+.DS_store
