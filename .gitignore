@@ -11,3 +11,6 @@ dist/
 src/database/config/config.json
 
 .DS_store
+
+# ignore log files
+/src/log/*.log

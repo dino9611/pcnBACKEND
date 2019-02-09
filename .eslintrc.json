@@ -4,7 +4,9 @@
     "no-process-env": "off",
     "no-sync": "off",
     "strict": "off",
-    "new-cap": "off"
+    "new-cap": "off",
+    "no-console": "warn",
+    "arrow-body-style": "off"
   },
   "parserOptions": {
     "sourceType": "module"
