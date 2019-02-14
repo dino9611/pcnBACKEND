@@ -1,5 +1,5 @@
+require('dotenv').config();
 import express from 'express';
-import logger from '../log/logger';
 import sequelize from '../database/sequelize';
 import { Admin, User } from '../database/models';
 import {
@@ -7,6 +7,7 @@ import {
   createJWTToken,
   decrypt,
   encrypt,
+  errorResponse,
   generateHash,
   pagingParams,
   responseStatus
@@ -35,22 +36,20 @@ router.get('/', pagingParams, (req, res) => {
       }
     ]
   }).
-    then(result =>
-      res.json({
-        status: responseStatus.SUCCESS,
-        message: 'Get data success !',
-        result: result || [],
-        encrypt: encrypt(appKey, 'abc123'),
-        hash: generateHash('abc123')
-      })).
-    catch(error => {
-      logger.error(error.message);
-
-      return res.status(500).json({
-        status: responseStatus.ERROR,
-        message:
-          'There\'s an error on the server. Please contact the administrator.'
+    then(result => {
+      Admin.count({ where: whereClause }).then(total => {
+        res.json({
+          status: responseStatus.SUCCESS,
+          message: 'Get data success !',
+          result: result || [],
+          total,
+          encrypt: encrypt(appKey, 'abc123'),
+          hash: generateHash('abc123')
+        });
       });
+    }).
+    catch(error => {
+      return errorResponse(error, res);
     });
 });
 
@@ -66,17 +65,6 @@ router.get('/:id', (req, res) => {
     ]
   }).
     then(result => {
-      // const result = usr ?
-      //   {
-      //     id: usr.id,
-      //     email: usr.email,
-      //     profilePicture: usr.profilePicture,
-      //     name: usr.admin ? usr.admin.name : '',
-      //     phoneNumber: usr.admin ? usr.admin.phoneNumber : '',
-      //     isSuperAdmin: usr.admin ? usr.admin.isSuperAdmin : ''
-      //   } :
-      //   {};
-
       res.json({
         status: result ? responseStatus.SUCCESS : responseStatus.NOT_FOUND,
         message: result ? 'Get data success !' : 'Data not found',
@@ -84,30 +72,8 @@ router.get('/:id', (req, res) => {
       });
     }).
     catch(error => {
-      logger.error(error.message);
-
-      return res.status(500).json({
-        status: responseStatus.ERROR,
-        message:
-          'There\'s an error on the server. Please contact the administrator.'
-      });
+      return errorResponse(error, res);
     });
-});
-
-router.post('/test/', (req, res) => {
-  User.create({
-    email: 'test@mail.com',
-    password: generateHash('abc123'),
-    type: 'admin'
-  }).
-    then(result =>
-      res.json({
-        result
-      })).
-    catch(error =>
-      res.json({
-        error
-      }));
 });
 
 router.post(
@@ -160,22 +126,10 @@ router.post(
           });
         }).
         catch(error => {
-          logger.error(error.message);
-
-          return res.status(500).json({
-            status: responseStatus.ERROR,
-            message:
-              'There\'s an error on the server. Please contact the administrator.'
-          });
+          return errorResponse(error, res);
         });
     } catch (error) {
-      logger.error(error.message);
-
-      return res.status(500).json({
-        status: responseStatus.ERROR,
-        message:
-          'There\'s an error on the server. Please contact the administrator.'
-      });
+      return errorResponse(error, res);
     }
   }
 );
@@ -233,23 +187,11 @@ router.put('/:id', (req, res) => {
             }
           })).
         catch(error => {
-          logger.error(error.message);
-
-          return res.status(500).json({
-            status: responseStatus.ERROR,
-            message:
-              'There\'s an error on the server. Please contact the administrator.'
-          });
+          return errorResponse(error, res);
         });
     }).
     catch(error => {
-      logger.error(error.message);
-
-      return res.status(500).json({
-        status: responseStatus.ERROR,
-        message:
-          'There\'s an error on the server. Please contact the administrator.'
-      });
+      return errorResponse(error, res);
     });
 });
 
@@ -278,31 +220,14 @@ router.delete('/:id', (req, res) => {
               });
             }).
             catch(error => {
-              logger.error(error.message);
-              res.status(500).json({
-                status: responseStatus.ERROR,
-                message:
-                  'There\'s an error on the server. Please contact the administrator.'
-              });
+              return errorResponse(error, res);
             })).
         catch(error => {
-          logger.error(error.message);
-
-          return res.status(500).json({
-            status: responseStatus.ERROR,
-            message:
-              'There\'s an error on the server. Please contact the administrator.'
-          });
+          return errorResponse(error, res);
         });
     }).
     catch(error => {
-      logger.error(error.message);
-
-      return res.status(500).json({
-        status: responseStatus.ERROR,
-        message:
-          'There\'s an error on the server. Please contact the administrator.'
-      });
+      return errorResponse(error, res);
     });
 });
 

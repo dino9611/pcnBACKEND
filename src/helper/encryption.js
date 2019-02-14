@@ -13,12 +13,16 @@ export const encrypt = (key, data) => {
 };
 
 export const decrypt = (key, data) => {
-  const decipher = crypto.createDecipher('aes192', key);
-  let decrypted = decipher.update(data, 'hex', 'utf-8');
+  try {
+    const decipher = crypto.createDecipher('aes192', key);
+    let decrypted = decipher.update(data, 'hex', 'utf-8');
 
-  decrypted += decipher.final('utf-8');
+    decrypted += decipher.final('utf-8');
 
-  return decrypted;
+    return decrypted;
+  } catch (error) {
+    return error;
+  }
 };
 
 export const generateHash = data => {

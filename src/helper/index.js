@@ -1,5 +1,17 @@
+require('dotenv').config();
 export * from './auth';
 export * from './encryption';
+export * from './slug';
+export * from './uploader';
+import logger from '../log/logger';
+
+export const responseStatus = {
+  SUCCESS: 'SUCCESS',
+  ERROR: 'ERROR',
+  NOT_FOUND: 'NOT_FOUND',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  NOT_VALID: 'NOT_VALID'
+};
 
 export const pagingParams = (req, res, next) => {
   const { all, page, pagesize } = req.query;
@@ -18,9 +30,13 @@ export const pagingParams = (req, res, next) => {
   next();
 };
 
-export const responseStatus = {
-  SUCCESS: 'SUCCESS',
-  ERROR: 'ERROR',
-  NOT_FOUND: 'NOT_FOUND',
-  UNAUTHORIZED: 'UNAUTHORIZED'
+export const errorResponse = (error, res, customMessage) => {
+  logger.error(JSON.stringify(error));
+
+  return res.status(500).json({
+    status: responseStatus.ERROR,
+    message:
+      customMessage ||
+      'There\'s an error on the server. Please contact the administrator.'
+  });
 };

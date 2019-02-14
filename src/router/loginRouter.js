@@ -1,11 +1,12 @@
+require('dotenv').config();
 import express from 'express';
-import logger from '../log/logger';
 import { Admin, HiringPartner, Student, User } from '../database/models';
 import { checkBody, validationType } from '../lib/validator';
 import {
   compareHash,
   createJWTToken,
   decrypt,
+  errorResponse,
   responseStatus
 } from '../helper';
 
@@ -19,7 +20,7 @@ router.post(
     { field: 'email', validationType: validationType.isEmail }
   ]),
   (req, res) => {
-    const { email, ep } = req.body;
+    const { email, ep, type } = req.body;
     const appKey = process.env.APPKEY || '';
     const password = decrypt(appKey, ep);
 
@@ -31,7 +32,7 @@ router.post(
     };
     let whereClause = {};
 
-    whereClause = Object.assign(whereClause, { email });
+    whereClause = Object.assign(whereClause, { email, type });
     User.findOne({
       where: whereClause
     }).
@@ -72,23 +73,11 @@ router.post(
                   });
                 }).
                 catch(error => {
-                  logger.error(error.message);
-
-                  return res.status(500).json({
-                    status: response.ERROR,
-                    message:
-                      'There\'s an error on the server. Please contact the administrator.'
-                  });
+                  return errorResponse(error, res);
                 });
             }).
             catch(error => {
-              logger.error(error.message);
-
-              return res.status(500).json({
-                status: response.ERROR,
-                message:
-                  'There\'s an error on the server. Please contact the administrator.'
-              });
+              return errorResponse(error, res);
             });
         } else if (usr.type === 'hiring_partner') {
           HiringPartner.findByPk(usr.id).
@@ -112,23 +101,11 @@ router.post(
                   });
                 }).
                 catch(error => {
-                  logger.error(error.message);
-
-                  return res.status(500).json({
-                    status: response.ERROR,
-                    message:
-                      'There\'s an error on the server. Please contact the administrator.'
-                  });
+                  return errorResponse(error, res);
                 });
             }).
             catch(error => {
-              logger.error(error.message);
-
-              return res.status(500).json({
-                status: response.ERROR,
-                message:
-                  'There\'s an error on the server. Please contact the administrator.'
-              });
+              return errorResponse(error, res);
             });
         } else if (usr.type === 'student') {
           Student.findByPk(usr.id).
@@ -151,34 +128,16 @@ router.post(
                   });
                 }).
                 catch(error => {
-                  logger.error(error.message);
-
-                  return res.status(500).json({
-                    status: response.ERROR,
-                    message:
-                      'There\'s an error on the server. Please contact the administrator.'
-                  });
+                  return errorResponse(error, res);
                 });
             }).
             catch(error => {
-              logger.error(error.message);
-
-              return res.status(500).json({
-                status: response.ERROR,
-                message:
-                  'There\'s an error on the server. Please contact the administrator.'
-              });
+              return errorResponse(error, res);
             });
         }
       }).
       catch(error => {
-        logger.error(error.message);
-
-        return res.status(500).json({
-          status: response.ERROR,
-          message:
-            'There\'s an error on the server. Please contact the administrator.'
-        });
+        return errorResponse(error, res);
       });
   }
 );

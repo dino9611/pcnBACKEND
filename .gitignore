@@ -14,3 +14,6 @@ src/database/config/config.json
 
 # ignore log files
 /src/log/*.log
+
+# ignore public folder
+/src/public

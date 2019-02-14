@@ -1,3 +1,4 @@
+require('dotenv').config();
 import jwt from 'jsonwebtoken';
 import { responseStatus } from './';
 const jwtKey = process.env.JWTKEY || 'careernetwork';

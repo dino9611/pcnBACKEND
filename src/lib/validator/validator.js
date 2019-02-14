@@ -19,8 +19,9 @@ const check = (req, res, next, params, source) => {
 
   if (result.length > 0) {
     res.status(422).json({
+      status: 'NOT_VALID',
       message: 'Requested data is not valid',
-      error: result
+      result
     });
   } else {
     return next();

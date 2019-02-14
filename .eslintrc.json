@@ -6,7 +6,8 @@
     "strict": "off",
     "new-cap": "off",
     "no-console": "warn",
-    "arrow-body-style": "off"
+    "arrow-body-style": "off",
+    "no-process-exit": "warn"
   },
   "parserOptions": {
     "sourceType": "module"

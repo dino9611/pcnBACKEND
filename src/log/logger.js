@@ -1,13 +1,15 @@
 import winston, { format } from 'winston';
 const { combine, timestamp, label, printf } = format;
 
-const myFormat = printf(info => `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`);
+const myFormat = printf(
+  info => `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`
+);
 
 const logger = winston.createLogger({
   level: 'info',
 
   // format: winston.format.json(),
-  format: combine(label({ label: 'Oneform Backend' }), timestamp(), myFormat),
+  format: combine(label({ label: 'Career Network Backend' }), timestamp(), myFormat),
   transports: [
     //
     // - Write to all logs with level `info` and below to `combined.log`

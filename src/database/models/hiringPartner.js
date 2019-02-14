@@ -53,8 +53,8 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  HiringPartner.associate = function () {
-    // associations can be defined here
+  HiringPartner.associate = function (models) {
+    HiringPartner.belongsTo(models.User, { foreignKey: 'id', as: 'user' });
   };
 
   return HiringPartner;
