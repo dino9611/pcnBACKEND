@@ -5,9 +5,13 @@ module.exports = {
     queryInterface.createTable('hiringPartners', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        references: {
+          model: 'users',
+          key: 'id'
+        },
+        type: Sequelize.INTEGER,
+        onDelete: 'cascade'
       },
       slug: {
         allowNull: false,

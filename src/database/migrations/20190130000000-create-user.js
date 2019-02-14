@@ -25,30 +25,6 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      studentId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'students',
-          key: 'id'
-        },
-        onDelete: 'cascade'
-      },
-      hiringPartnerId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'hiringPartners',
-          key: 'id'
-        },
-        onDelete: 'cascade'
-      },
-      adminId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'admins',
-          key: 'id'
-        },
-        onDelete: 'cascade'
-      },
       lastLogin: {
         type: Sequelize.DATE
       },

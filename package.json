@@ -10,7 +10,9 @@
     "server": "node dist/index.js",
     "migrate": "cd src/database && sequelize db:migrate",
     "undo-migration": "cd src/database && sequelize db:migrate:undo",
-    "deep-undo-migration": "cd src/database && sequelize db:migrate:undo:all"
+    "deep-undo-migration": "cd src/database && sequelize db:migrate:undo:all",
+    "seed": "cd src/database && sequelize db:seed:all",
+    "undo-seed": "cd src/database && sequelize db:seed:undo:all"
   },
   "repository": {
     "type": "git",
@@ -32,14 +34,17 @@
     "nodemon": "^1.18.9"
   },
   "dependencies": {
-    "bcrypt": "^3.0.3",
+    "bcrypt": "^3.0.4",
     "body-parser": "^1.18.3",
+    "crypto": "^1.0.1",
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "express-bearer-token": "^2.2.0",
     "jsonwebtoken": "^8.4.0",
     "moment": "^2.24.0",
+    "multer": "^1.4.1",
     "mysql2": "^1.6.4",
-    "sequelize": "^4.42.0"
+    "sequelize": "^4.42.0",
+    "winston": "^3.2.1"
   }
 }

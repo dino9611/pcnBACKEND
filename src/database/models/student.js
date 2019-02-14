@@ -37,13 +37,16 @@ module.exports = (sequelize, DataTypes) => {
       },
       gender: {
         type: DataTypes.STRING(1)
+      },
+      isAvailable: {
+        type: DataTypes.BOOLEAN
       }
     },
     {}
   );
 
-  Student.associate = function () {
-    // associations can be defined here
+  Student.associate = function (models) {
+    Student.belongsTo(models.User, { foreignKey: 'id', as: 'user' });
   };
 
   return Student;
