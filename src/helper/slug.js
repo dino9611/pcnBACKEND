@@ -1,5 +1,6 @@
 import sequelize from '../database/sequelize';
 import { HiringPartner, Student } from '../database/models';
+import '@babel/polyfill';
 
 const Op = sequelize.Op;
 
