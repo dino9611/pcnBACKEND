@@ -2,12 +2,12 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) =>
-    queryInterface.createTable('admins', {
+    queryInterface.createTable('Admins', {
       id: {
         allowNull: false,
         primaryKey: true,
         references: {
-          model: 'users',
+          model: 'Users',
           key: 'id'
         },
         type: Sequelize.INTEGER,
@@ -33,5 +33,5 @@ module.exports = {
         type: Sequelize.DATE
       }
     }),
-  down: queryInterface => queryInterface.dropTable('admins')
+  down: queryInterface => queryInterface.dropTable('Admins')
 };

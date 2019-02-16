@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) =>
-    queryInterface.createTable('studentJobInterestRoles', {
+    queryInterface.createTable('StudentJobInterestRoles', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,7 +12,7 @@ module.exports = {
       studentJobInterestId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'studentJobInterests',
+          model: 'StudentJobInterests',
           key: 'id'
         },
         allowNull: false,
@@ -21,7 +21,7 @@ module.exports = {
       roleId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'jobRoles',
+          model: 'JobRoles',
           key: 'id'
         },
         allowNull: false
@@ -39,5 +39,5 @@ module.exports = {
         type: Sequelize.DATE
       }
     }),
-  down: queryInterface => queryInterface.dropTable('studentJobInterestRoles')
+  down: queryInterface => queryInterface.dropTable('StudentJobInterestRoles')
 };

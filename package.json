@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --exec babel-node src/index.js",
     "build": "./node_modules/.bin/babel src --out-dir dist",
-    "server": "forever start dist/index.js",
+    "server": "NODE_ENV=production forever start dist/index.js",
     "stop-server": "forever stopall",
     "restart-server": "forever restartall",
     "log-server": "forever logs",

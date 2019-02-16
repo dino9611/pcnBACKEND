@@ -4,9 +4,9 @@ const models = require('../models');
 const User = models.User;
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  up: async queryInterface => {
     queryInterface.bulkInsert(
-      'users',
+      'Users',
       [
         {
           email: 'admin@purwadhika-career.com',
@@ -28,7 +28,7 @@ module.exports = {
     });
 
     return await queryInterface.bulkInsert(
-      'admins',
+      'Admins',
       [
         {
           id: user.id,
@@ -42,8 +42,8 @@ module.exports = {
       {}
     );
   },
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('admins', null, {});
-    await queryInterface.bulkDelete('users', null, {});
+  down: async queryInterface => {
+    await queryInterface.bulkDelete('Admins', null, {});
+    await queryInterface.bulkDelete('Users', null, {});
   }
 };
