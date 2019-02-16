@@ -1,7 +1,8 @@
 require('dotenv').config();
+import config from '../config.json';
 import jwt from 'jsonwebtoken';
 import { responseStatus } from './';
-const jwtKey = process.env.JWTKEY || 'careernetwork';
+const jwtKey = config.JWTKEY || 'careernetwork';
 
 export const createJWTToken = payload => {
   return jwt.sign(payload, jwtKey, { expiresIn: '3h' });

@@ -1,8 +1,8 @@
 require('dotenv').config();
 import bearerToken from 'express-bearer-token';
 import bodyParser from 'body-parser';
+import config from './config.json';
 import express from 'express';
-import fs from 'fs';
 import logger from './log/logger';
 import {
   AdminRouter,
@@ -12,7 +12,7 @@ import {
 } from './router';
 
 const app = express();
-const port = process.env.PORT || 2411;
+const port = config.PORT || 2411;
 
 app.set('etag', false);
 app.use((req, res, next) => {
@@ -34,19 +34,9 @@ app.use(express.static('./src/public'));
 app.get('/', (req, res) => {
   res.send(
     `Welcome to "Purwadhika Career Network API version : ${
-      process.env.VERSION
+      config.VERSION
     }"`
   );
-});
-
-app.get('/test', (req, res) => {
-  fs.readFile('somefile.txt', (err, data) => {
-    if (err) {
-      throw err;
-    }
-    console.log(data);
-  });
-  res.send('test !!');
 });
 
 // list of router

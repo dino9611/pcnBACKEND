@@ -3,6 +3,7 @@ export * from './auth';
 export * from './encryption';
 export * from './slug';
 export * from './uploader';
+import config from '../config.json';
 import logger from '../log/logger';
 
 export const responseStatus = {
@@ -19,7 +20,7 @@ export const pagingParams = (req, res, next) => {
   let limit = null;
 
   if (all === undefined) {
-    const pSize = pagesize || process.env.DATAPERREQUEST || 15;
+    const pSize = pagesize || config.DATAPERREQUEST || 15;
 
     offset = parseInt(((page || 1) - 1) * pSize, 10);
     limit = parseInt(pSize, 10);

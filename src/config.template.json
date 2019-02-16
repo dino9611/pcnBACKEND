@@ -1,0 +1,8 @@
+{
+    "VERSION": "1.0.0",
+    "HOSTNAME": "http://localhost:2411",
+    "PORT": "2411",
+    "JWTKEY": "careernetwork",
+    "APPKEY": "careernetwork",
+    "DATAPERREQUEST": "15"
+}

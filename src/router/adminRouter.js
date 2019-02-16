@@ -1,4 +1,5 @@
 require('dotenv').config();
+import config from '../config.json';
 import express from 'express';
 import sequelize from '../database/sequelize';
 import { Admin, User } from '../database/models';
@@ -14,7 +15,7 @@ import {
 } from '../helper';
 import { checkBody, validationType } from '../lib/validator';
 
-const appKey = process.env.APPKEY || 'careernetwork';
+const appKey = config.APPKEY || 'careernetwork';
 const router = express.Router();
 
 router.use(auth);

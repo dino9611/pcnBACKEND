@@ -1,4 +1,5 @@
 require('dotenv').config();
+import config from '../config.json';
 import express from 'express';
 import fs from 'fs';
 import logger from '../log/logger';
@@ -29,8 +30,8 @@ import {
   User
 } from '../database/models';
 
-const appKey = process.env.APPKEY;
-const hostName = process.env.HOSTNAME;
+const appKey = config.APPKEY;
+const hostName = config.HOSTNAME;
 const router = express.Router();
 const path = '/files/student';
 const Op = sequelize.Op;

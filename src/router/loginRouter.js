@@ -1,4 +1,5 @@
 require('dotenv').config();
+import config from '../config.json';
 import express from 'express';
 import { Admin, HiringPartner, Student, User } from '../database/models';
 import { checkBody, validationType } from '../lib/validator';
@@ -21,7 +22,7 @@ router.post(
   ]),
   (req, res) => {
     const { email, ep, type } = req.body;
-    const appKey = process.env.APPKEY || '';
+    const appKey = config.APPKEY || 'careernetwork';
     const password = decrypt(appKey, ep);
 
     const response = {
