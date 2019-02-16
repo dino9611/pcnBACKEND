@@ -1,10 +1,9 @@
 require('dotenv').config();
 import bearerToken from 'express-bearer-token';
 import bodyParser from 'body-parser';
-import cluster from 'cluster';
 import express from 'express';
+import fs from 'fs';
 import logger from './log/logger';
-import os from 'os';
 import {
   AdminRouter,
   HiringPartnerRouter,
@@ -12,57 +11,55 @@ import {
   StudentRouter
 } from './router';
 
-const workers = os.cpus().length;
+const app = express();
+const port = process.env.PORT || 2411;
 
-if (cluster.isMaster) {
-  for (let i = 0; i < workers; ++i) {
-    cluster.fork();
-  }
+app.set('etag', false);
+app.use((req, res, next) => {
+  res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, Accept, Accept-Version, Authorization, Content-Length, Cache-Control, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token'
+  );
+  next();
+});
 
-  cluster.on('exit', () => {
-    cluster.fork();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bearerToken());
+app.use(express.static('./src/public'));
+
+app.get('/', (req, res) => {
+  res.send(
+    `Welcome to "Purwadhika Career Network API version : ${
+      process.env.VERSION
+    }"`
+  );
+});
+
+app.get('/test', (req, res) => {
+  fs.readFile('somefile.txt', (err, data) => {
+    if (err) {
+      throw err;
+    }
+    console.log(data);
   });
-} else {
-  const app = express();
-  const port = process.env.PORT || 8080;
+  res.send('test !!');
+});
 
-  app.set('etag', false);
-  app.use((req, res, next) => {
-    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Origin, Accept, Accept-Version, Authorization, Content-Length, Cache-Control, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token'
-    );
-    next();
-  });
+// list of router
+app.use('/admins', AdminRouter);
+app.use('/hiringpartners', HiringPartnerRouter);
+app.use('/students', StudentRouter);
+app.use('/logins', LoginRouter);
 
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(bodyParser.json());
-  app.use(bearerToken());
-  app.use(express.static('./src/public'));
+// list of router
 
-  app.get('/', (req, res) => {
-    res.send(
-      `Welcome to "Purwadhika Career Network API version : ${
-        process.env.VERSION
-      }"`
-    );
-  });
-
-  // list of router
-  app.use('/admins', AdminRouter);
-  app.use('/hiringpartners', HiringPartnerRouter);
-  app.use('/students', StudentRouter);
-  app.use('/logins', LoginRouter);
-
-  // list of router
-
-  app.listen(port, '0.0.0.0', () => {
-    // console.log(`App running on port ${port}`);
-  });
-}
+app.listen(port, '0.0.0.0', () => {
+  // console.log(`App running on port ${port}`);
+});
 
 process.on('uncaughtException', error => {
   logger.error(JSON.stringify(error));

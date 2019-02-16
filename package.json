@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --exec babel-node src/index.js",
     "build": "./node_modules/.bin/babel src --out-dir dist",
-    "server": "node dist/index.js",
+    "server": "forever start dist/index.js",
+    "stop-server": "forever stopall",
+    "restart-server": "forever restartall",
+    "log-server": "forever logs",
     "migrate": "cd src/database && sequelize db:migrate",
     "undo-migration": "cd src/database && sequelize db:migrate:undo",
     "deep-undo-migration": "cd src/database && sequelize db:migrate:undo:all",
@@ -31,6 +34,7 @@
     "@babel/preset-env": "^7.3.1",
     "eslint": "^5.12.1",
     "eslint-config-es": "^0.9.1",
+    "forever": "^0.15.3",
     "nodemon": "^1.18.9"
   },
   "dependencies": {
