@@ -1,4 +1,3 @@
-require('dotenv').config();
 import config from '../config.json';
 import express from 'express';
 import sequelize from '../database/sequelize';

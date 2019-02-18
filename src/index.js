@@ -1,4 +1,3 @@
-require('dotenv').config();
 import bearerToken from 'express-bearer-token';
 import bodyParser from 'body-parser';
 import config from './config.json';

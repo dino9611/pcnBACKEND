@@ -1,4 +1,3 @@
-require('dotenv').config();
 import config from '../config.json';
 import jwt from 'jsonwebtoken';
 import { responseStatus } from './';

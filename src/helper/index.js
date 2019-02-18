@@ -1,4 +1,3 @@
-require('dotenv').config();
 export * from './auth';
 export * from './encryption';
 export * from './slug';
