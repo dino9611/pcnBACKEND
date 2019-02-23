@@ -6,11 +6,11 @@ import logger from './log/logger';
 import {
   AdminRouter,
   CityRouter,
+  HiringPartnerRegistrationRouter,
   HiringPartnerRouter,
   LoginRouter,
   ProvinceRouter,
-  StudentRouter,
-  SuccessStoryRouter
+  StudentRouter, SuccessStoryRouter
 } from './router';
 
 const app = express();
@@ -47,6 +47,7 @@ app.use('/success-story', SuccessStoryRouter);
 app.use('/cities', CityRouter);
 app.use('/provinces', ProvinceRouter);
 app.use('/logins', LoginRouter);
+app.use('/hp-registration', HiringPartnerRegistrationRouter);
 
 // list of router
 
