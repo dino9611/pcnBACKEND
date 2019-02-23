@@ -382,12 +382,14 @@ router.delete('/:id', (req, res) => {
                   usr.
                     destroy().
                     then(() => {
-                      fs.unlinkSync(
-                        `./src/public${usr.profilePicture.replace(
-                          hostName,
-                          ''
-                        )}`
-                      );
+                      if (usr.profilePicture) {
+                        fs.unlinkSync(
+                          `./src/public${usr.profilePicture.replace(
+                            hostName,
+                            ''
+                          )}`
+                        );
+                      }
 
                       return res.json({
                         status: responseStatus.SUCCESS,

@@ -14,7 +14,7 @@ import {
   tokenAuth,
   uploader
 } from '../helper';
-import { Student, User } from '../database/models';
+import { Student, StudentResume, User } from '../database/models';
 
 const appKey = config.APPKEY;
 const hostName = config.HOSTNAME;
@@ -212,7 +212,15 @@ router.post('/', (req, res) => {
                   },
                   { transaction: tr }
                 ).then(() => {
-                  return result;
+                  // create default student resume
+                  return StudentResume.create(
+                    {
+                      id: result.id
+                    },
+                    { transaction: tr }
+                  ).then(() => {
+                    return result;
+                  });
                 });
               });
             }).
@@ -403,12 +411,14 @@ router.delete('/:id', (req, res) => {
                   usr.
                     destroy().
                     then(() => {
-                      fs.unlinkSync(
-                        `./src/public${usr.profilePicture.replace(
-                          hostName,
-                          ''
-                        )}`
-                      );
+                      if (usr.profilePicture) {
+                        fs.unlinkSync(
+                          `./src/public${usr.profilePicture.replace(
+                            hostName,
+                            ''
+                          )}`
+                        );
+                      }
 
                       return res.json({
                         status: responseStatus.SUCCESS,

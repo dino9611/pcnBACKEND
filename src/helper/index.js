@@ -31,7 +31,12 @@ export const pagingParams = (req, res, next) => {
 };
 
 export const errorResponse = (error, res, customMessage) => {
-  logger.error(JSON.stringify(error));
+  const errData = {
+    errorMessage: error.message,
+    error
+  };
+
+  logger.error(JSON.stringify(errData));
 
   return res.status(500).json({
     status: responseStatus.ERROR,
