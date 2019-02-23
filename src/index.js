@@ -10,7 +10,9 @@ import {
   HiringPartnerRouter,
   LoginRouter,
   ProvinceRouter,
-  StudentRouter, SuccessStoryRouter
+  StudentResumeRouter,
+  StudentRouter,
+  SuccessStoryRouter
 } from './router';
 
 const app = express();
@@ -47,7 +49,8 @@ app.use('/success-story', SuccessStoryRouter);
 app.use('/cities', CityRouter);
 app.use('/provinces', ProvinceRouter);
 app.use('/logins', LoginRouter);
-app.use('/hp-registration', HiringPartnerRegistrationRouter);
+app.use('/hp-registrations', HiringPartnerRegistrationRouter);
+app.use('/student-resumes', StudentResumeRouter);
 
 // list of router
 

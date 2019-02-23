@@ -5,9 +5,13 @@ module.exports = {
     queryInterface.createTable('StudentResumes', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        references: {
+          model: 'Students',
+          key: 'id'
+        },
+        type: Sequelize.INTEGER,
+        onDelete: 'cascade'
       },
 
       headline: {
@@ -24,15 +28,6 @@ module.exports = {
       },
       profileVideo: {
         type: Sequelize.STRING
-      },
-
-      studentId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Students',
-          key: 'id'
-        },
-        onDelete: 'cascade'
       },
       createdAt: {
         allowNull: false,

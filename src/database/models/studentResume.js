@@ -18,9 +18,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       profileVideo: {
         type: DataTypes.STRING
-      },
-      studentId: {
-        type: DataTypes.INTEGER
       }
     },
     {}

@@ -6,3 +6,4 @@ export * from './loginRouter';
 export * from './cityRouter';
 export * from './provinceRouter';
 export * from './hiringPartnerRegistrationRouter';
+export * from './studentResumeRouter';
