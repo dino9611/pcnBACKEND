@@ -7,7 +7,8 @@ import {
   AdminRouter,
   HiringPartnerRouter,
   LoginRouter,
-  StudentRouter
+  StudentRouter,
+  SuccessStoryRouter
 } from './router';
 
 const app = express();
@@ -32,16 +33,15 @@ app.use(express.static('./src/public'));
 
 app.get('/', (req, res) => {
   res.send(
-    `Welcome to "Purwadhika Career Network API version : ${
-      config.VERSION
-    }"`
+    `Welcome to "Purwadhika Career Network API version : ${config.VERSION}"`
   );
 });
 
 // list of router
 app.use('/admins', AdminRouter);
-app.use('/hiringpartners', HiringPartnerRouter);
+app.use('/hiring-partners', HiringPartnerRouter);
 app.use('/students', StudentRouter);
+app.use('/success-story', SuccessStoryRouter);
 app.use('/logins', LoginRouter);
 
 // list of router

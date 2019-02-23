@@ -1,3 +1,4 @@
+import auth from 'basic-auth';
 import config from '../config.json';
 import jwt from 'jsonwebtoken';
 import { responseStatus } from './';
@@ -28,7 +29,7 @@ export const validateBearerToken = (req, res, next) => {
   }
 };
 
-export const auth = (req, res, next) => {
+export const tokenAuth = (req, res, next) => {
   if (req.method !== 'OPTIONS') {
     // let success = true;
     jwt.verify(req.token, jwtKey, (error, decoded) => {
@@ -45,4 +46,21 @@ export const auth = (req, res, next) => {
   } else {
     return next();
   }
+};
+
+export const basicAuth = (req, res, next) => {
+  if (req.method !== 'OPTIONS') {
+    const user = auth(req);
+
+    if (user.name === 'pwdkdeveloper' && user.pass === config.BASICAUTHKEY) {
+      return next();
+    }
+
+    return res.status(401).json({
+      status: responseStatus.UNAUTHORIZED,
+      message: 'User not authorized.'
+    });
+  }
+
+  return next();
 };

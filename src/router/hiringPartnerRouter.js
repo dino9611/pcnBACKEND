@@ -5,13 +5,13 @@ import sequelize from '../database/sequelize';
 import { validate } from '../lib/validator/core';
 import { validationType } from '../lib/validator';
 import {
-  auth,
   decrypt,
   errorResponse,
   generateHash,
   generateHiringPartnerSlug,
   pagingParams,
   responseStatus,
+  tokenAuth,
   uploader
 } from '../helper';
 import { HiringPartner, User } from '../database/models';
@@ -21,7 +21,7 @@ const hostName = config.HOSTNAME;
 const router = express.Router();
 const path = '/files/hiring_partner';
 
-router.use(auth);
+router.use(tokenAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { limit, offset, name, slug } = req.query;

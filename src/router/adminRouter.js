@@ -2,22 +2,22 @@ import config from '../config.json';
 import express from 'express';
 import sequelize from '../database/sequelize';
 import { Admin, User } from '../database/models';
+import { checkBody, validationType } from '../lib/validator';
 import {
-  auth,
   createJWTToken,
   decrypt,
   encrypt,
   errorResponse,
   generateHash,
   pagingParams,
-  responseStatus
+  responseStatus,
+  tokenAuth
 } from '../helper';
-import { checkBody, validationType } from '../lib/validator';
 
 const appKey = config.APPKEY || 'careernetwork';
 const router = express.Router();
 
-router.use(auth);
+router.use(tokenAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { offset, limit } = req;

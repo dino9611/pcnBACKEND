@@ -4,6 +4,9 @@ module.exports = (sequelize, DataTypes) => {
   const SuccessStory = sequelize.define(
     'SuccessStory',
     {
+      type: {
+        type: DataTypes.STRING
+      },
       photo: {
         type: DataTypes.STRING
       },
