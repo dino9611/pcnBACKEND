@@ -3,6 +3,7 @@ import express from 'express';
 import { Program } from '../database/models';
 import sequelize from '../database/sequelize';
 import {
+  basicAuth,
   errorResponse,
   pagingParams,
   responseStatus,
@@ -12,9 +13,9 @@ import {
 const router = express.Router();
 const Op = sequelize.Op;
 
-router.use(tokenAuth);
+// router.use(tokenAuth);
 
-router.get('/', pagingParams, (req, res) => {
+router.get('/', basicAuth, pagingParams, (req, res) => {
   const { offset, limit, program } = req.query;
   let whereClause = {};
 
@@ -45,7 +46,7 @@ router.get('/', pagingParams, (req, res) => {
     });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', basicAuth, (req, res) => {
   Program.findByPk(req.params.id, {
     attributes: [ 'program' ]
   }).
@@ -61,7 +62,7 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.post('/', checkBody([{ field: 'program' }]), (req, res) => {
+router.post('/', tokenAuth, checkBody([{ field: 'program' }]), (req, res) => {
   try {
     const { program } = req.body;
 
@@ -85,7 +86,7 @@ router.post('/', checkBody([{ field: 'program' }]), (req, res) => {
   }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', tokenAuth, (req, res) => {
   Program.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
@@ -117,7 +118,7 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', tokenAuth, (req, res) => {
   Program.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
