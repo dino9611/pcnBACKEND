@@ -52,7 +52,7 @@ export const basicAuth = (req, res, next) => {
   if (req.method !== 'OPTIONS') {
     const user = auth(req);
 
-    if (user.name === 'pwdkdeveloper' && user.pass === config.BASICAUTHKEY) {
+    if (user && user.name === 'pwdkdeveloper' && user.pass === config.BASICAUTHKEY) {
       return next();
     }
 

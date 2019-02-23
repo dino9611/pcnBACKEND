@@ -5,8 +5,10 @@ import express from 'express';
 import logger from './log/logger';
 import {
   AdminRouter,
+  CityRouter,
   HiringPartnerRouter,
   LoginRouter,
+  ProvinceRouter,
   StudentRouter,
   SuccessStoryRouter
 } from './router';
@@ -42,6 +44,8 @@ app.use('/admins', AdminRouter);
 app.use('/hiring-partners', HiringPartnerRouter);
 app.use('/students', StudentRouter);
 app.use('/success-story', SuccessStoryRouter);
+app.use('/cities', CityRouter);
+app.use('/provinces', ProvinceRouter);
 app.use('/logins', LoginRouter);
 
 // list of router

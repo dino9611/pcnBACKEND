@@ -20,7 +20,7 @@ const router = express.Router();
 router.use(tokenAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit } = req;
+  const { offset, limit } = req.query;
   const whereClause = {};
 
   Admin.findAll({
