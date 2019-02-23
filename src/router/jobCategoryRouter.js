@@ -1,37 +1,37 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
-import { Province } from '../database/models';
+import { JobCategory } from '../database/models';
 import sequelize from '../database/sequelize';
 import {
-  basicAuth,
   errorResponse,
   pagingParams,
-  responseStatus
+  responseStatus,
+  tokenAuth
 } from '../helper';
 
 const router = express.Router();
 const Op = sequelize.Op;
 
-router.use(basicAuth);
+router.use(tokenAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit, province } = req.query;
+  const { offset, limit, category } = req.query;
   let whereClause = {};
 
-  if (province) {
+  if (category) {
     whereClause = Object.assign(whereClause, {
-      province: { [Op.like]: `%${province}%` }
+      category: { [Op.like]: `%${category}%` }
     });
   }
 
-  Province.findAll({
+  JobCategory.findAll({
     where: whereClause,
-    attributes: [ 'province' ],
+    attributes: [ 'category' ],
     offset,
     limit
   }).
     then(result => {
-      Province.count({ where: whereClause }).then(total => {
+      JobCategory.count({ where: whereClause }).then(total => {
         res.json({
           status: responseStatus.SUCCESS,
           message: 'Get data success !',
@@ -46,8 +46,8 @@ router.get('/', pagingParams, (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  Province.findByPk(req.params.id, {
-    attributes: [ 'province' ]
+  JobCategory.findByPk(req.params.id, {
+    attributes: [ 'category' ]
   }).
     then(result => {
       res.json({
@@ -61,12 +61,12 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.post('/', checkBody([{ field: 'province' }]), (req, res) => {
+router.post('/', checkBody([{ field: 'category' }]), (req, res) => {
   try {
-    const { province } = req.body;
+    const { category } = req.body;
 
-    Province.create({
-      province
+    JobCategory.create({
+      category
     }).
       then(result => {
         return res.json({
@@ -86,7 +86,7 @@ router.post('/', checkBody([{ field: 'province' }]), (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-  Province.findByPk(req.params.id).
+  JobCategory.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
         return res.json({
@@ -94,11 +94,11 @@ router.put('/:id', (req, res) => {
           message: 'Data not found !'
         });
       }
-      const { province } = req.body;
+      const { category } = req.body;
 
       obj.
         update({
-          province: province || obj.province
+          category: category || obj.category
         }).
         then(() =>
           res.json({
@@ -118,7 +118,7 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  Province.findByPk(req.params.id).
+  JobCategory.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
         return res.json({
@@ -134,8 +134,7 @@ router.delete('/:id', (req, res) => {
             status: responseStatus.SUCCESS,
             message: 'Data deleted !',
             result: {
-              id: obj.id,
-              province: obj.province
+              id: obj.id
             }
           });
         }).
@@ -148,4 +147,4 @@ router.delete('/:id', (req, res) => {
     });
 });
 
-export const ProvinceRouter = router;
+export const JobCategoryRouter = router;

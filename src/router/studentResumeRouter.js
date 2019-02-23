@@ -3,16 +3,16 @@ import express from 'express';
 import sequelize from '../database/sequelize';
 import { StudentResume } from '../database/models';
 import {
-  basicAuth,
   errorResponse,
   pagingParams,
-  responseStatus
+  responseStatus,
+  tokenAuth
 } from '../helper';
 
 const router = express.Router();
 const Op = sequelize.Op;
 
-router.use(basicAuth);
+router.use(tokenAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { offset, limit, name } = req.query;

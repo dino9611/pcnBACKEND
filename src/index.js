@@ -8,8 +8,11 @@ import {
   CityRouter,
   HiringPartnerRegistrationRouter,
   HiringPartnerRouter,
+  JobCategoryRouter,
   LoginRouter,
+  ProgramRouter,
   ProvinceRouter,
+  SkillRouter,
   StudentResumeRouter,
   StudentRouter,
   SuccessStoryRouter
@@ -43,14 +46,17 @@ app.get('/', (req, res) => {
 
 // list of router
 app.use('/admins', AdminRouter);
+app.use('/cities', CityRouter);
+app.use('/hp-registrations', HiringPartnerRegistrationRouter);
 app.use('/hiring-partners', HiringPartnerRouter);
+app.use('/job-categories', JobCategoryRouter);
+app.use('/logins', LoginRouter);
+app.use('/programs', ProgramRouter);
+app.use('/provinces', ProvinceRouter);
+app.use('/skills', SkillRouter);
+app.use('/student-resumes', StudentResumeRouter);
 app.use('/students', StudentRouter);
 app.use('/success-story', SuccessStoryRouter);
-app.use('/cities', CityRouter);
-app.use('/provinces', ProvinceRouter);
-app.use('/logins', LoginRouter);
-app.use('/hp-registrations', HiringPartnerRegistrationRouter);
-app.use('/student-resumes', StudentResumeRouter);
 
 // list of router
 
