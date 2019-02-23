@@ -56,7 +56,7 @@ app.use('/provinces', ProvinceRouter);
 app.use('/skills', SkillRouter);
 app.use('/student-resumes', StudentResumeRouter);
 app.use('/students', StudentRouter);
-app.use('/success-story', SuccessStoryRouter);
+app.use('/success-stories', SuccessStoryRouter);
 
 // list of router
 
