@@ -16,18 +16,18 @@ const Op = sequelize.Op;
 // router.use(tokenAuth);
 
 router.get('/', basicAuth, pagingParams, (req, res) => {
-  const { offset, limit, role } = req.query;
+  const { offset, limit, jobRole } = req.query;
   let whereClause = {};
 
-  if (role) {
+  if (jobRole) {
     whereClause = Object.assign(whereClause, {
-      role: { [Op.like]: `%${role}%` }
+      jobRole: { [Op.like]: `%${jobRole}%` }
     });
   }
 
   JobRole.findAll({
     where: whereClause,
-    attributes: [ 'role' ],
+    attributes: [ 'jobRole' ],
     offset,
     limit
   }).
@@ -48,7 +48,7 @@ router.get('/', basicAuth, pagingParams, (req, res) => {
 
 router.get('/:id', basicAuth, (req, res) => {
   JobRole.findByPk(req.params.id, {
-    attributes: [ 'role' ]
+    attributes: [ 'jobRole' ]
   }).
     then(result => {
       res.json({
@@ -62,12 +62,12 @@ router.get('/:id', basicAuth, (req, res) => {
     });
 });
 
-router.post('/', tokenAuth, checkBody([{ field: 'role' }]), (req, res) => {
+router.post('/', tokenAuth, checkBody([{ field: 'jobRole' }]), (req, res) => {
   try {
-    const { role } = req.body;
+    const { jobRole } = req.body;
 
     JobRole.create({
-      role
+      jobRole
     }).
       then(result => {
         return res.json({
@@ -95,11 +95,11 @@ router.put('/:id', tokenAuth, (req, res) => {
           message: 'Data not found !'
         });
       }
-      const { role } = req.body;
+      const { jobRole } = req.body;
 
       obj.
         update({
-          role: role || obj.role
+          jobRole: jobRole || obj.jobRole
         }).
         then(() =>
           res.json({

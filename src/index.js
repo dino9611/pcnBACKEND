@@ -8,7 +8,7 @@ import {
   CityRouter,
   HiringPartnerRegistrationRouter,
   HiringPartnerRouter,
-  JobCategoryRouter,
+  JobRoleRouter,
   LoginRouter,
   ProgramRouter,
   ProvinceRouter,
@@ -49,7 +49,7 @@ app.use('/admins', AdminRouter);
 app.use('/cities', CityRouter);
 app.use('/hp-registrations', HiringPartnerRegistrationRouter);
 app.use('/hiring-partners', HiringPartnerRouter);
-app.use('/job-categories', JobCategoryRouter);
+app.use('/job-roles', JobRoleRouter);
 app.use('/logins', LoginRouter);
 app.use('/programs', ProgramRouter);
 app.use('/provinces', ProvinceRouter);

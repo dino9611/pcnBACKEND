@@ -2,7 +2,7 @@ export * from './adminRouter';
 export * from './cityRouter';
 export * from './hiringPartnerRegistrationRouter';
 export * from './hiringPartnerRouter';
-export * from './jobCategoryRouter';
+export * from './jobRoleRouter';
 export * from './loginRouter';
 export * from './programRouter';
 export * from './provinceRouter';
