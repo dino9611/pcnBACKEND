@@ -1,6 +1,6 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
-import { JobCategory } from '../database/models';
+import { JobRole } from '../database/models';
 import sequelize from '../database/sequelize';
 import {
   basicAuth,
@@ -16,23 +16,23 @@ const Op = sequelize.Op;
 // router.use(tokenAuth);
 
 router.get('/', basicAuth, pagingParams, (req, res) => {
-  const { offset, limit, category } = req.query;
+  const { offset, limit, role } = req.query;
   let whereClause = {};
 
-  if (category) {
+  if (role) {
     whereClause = Object.assign(whereClause, {
-      category: { [Op.like]: `%${category}%` }
+      role: { [Op.like]: `%${role}%` }
     });
   }
 
-  JobCategory.findAll({
+  JobRole.findAll({
     where: whereClause,
-    attributes: [ 'category' ],
+    attributes: [ 'role' ],
     offset,
     limit
   }).
     then(result => {
-      JobCategory.count({ where: whereClause }).then(total => {
+      JobRole.count({ where: whereClause }).then(total => {
         res.json({
           status: responseStatus.SUCCESS,
           message: 'Get data success !',
@@ -47,8 +47,8 @@ router.get('/', basicAuth, pagingParams, (req, res) => {
 });
 
 router.get('/:id', basicAuth, (req, res) => {
-  JobCategory.findByPk(req.params.id, {
-    attributes: [ 'category' ]
+  JobRole.findByPk(req.params.id, {
+    attributes: [ 'role' ]
   }).
     then(result => {
       res.json({
@@ -62,12 +62,12 @@ router.get('/:id', basicAuth, (req, res) => {
     });
 });
 
-router.post('/', tokenAuth, checkBody([{ field: 'category' }]), (req, res) => {
+router.post('/', tokenAuth, checkBody([{ field: 'role' }]), (req, res) => {
   try {
-    const { category } = req.body;
+    const { role } = req.body;
 
-    JobCategory.create({
-      category
+    JobRole.create({
+      role
     }).
       then(result => {
         return res.json({
@@ -87,7 +87,7 @@ router.post('/', tokenAuth, checkBody([{ field: 'category' }]), (req, res) => {
 });
 
 router.put('/:id', tokenAuth, (req, res) => {
-  JobCategory.findByPk(req.params.id).
+  JobRole.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
         return res.json({
@@ -95,11 +95,11 @@ router.put('/:id', tokenAuth, (req, res) => {
           message: 'Data not found !'
         });
       }
-      const { category } = req.body;
+      const { role } = req.body;
 
       obj.
         update({
-          category: category || obj.category
+          role: role || obj.role
         }).
         then(() =>
           res.json({
@@ -119,7 +119,7 @@ router.put('/:id', tokenAuth, (req, res) => {
 });
 
 router.delete('/:id', tokenAuth, (req, res) => {
-  JobCategory.findByPk(req.params.id).
+  JobRole.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
         return res.json({
@@ -148,4 +148,4 @@ router.delete('/:id', tokenAuth, (req, res) => {
     });
 });
 
-export const JobCategoryRouter = router;
+export const JobRoleRouter = router;

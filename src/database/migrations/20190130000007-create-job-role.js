@@ -9,16 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      jobCategoryId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'JobCategories',
-          key: 'id'
-        },
-        allowNull: false,
-        onDelete: 'cascade'
-      },
-      role: {
+      jobRole: {
         allowNull: false,
         type: Sequelize.STRING,
         unique: true

@@ -18,10 +18,10 @@ module.exports = {
         allowNull: false,
         onDelete: 'cascade'
       },
-      jobCategoryId: {
+      jobRoleId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'JobCategories',
+          model: 'JobRoles',
           key: 'id'
         },
         allowNull: false,
@@ -30,6 +30,10 @@ module.exports = {
       experience: {
         // berapa tahun pengalaman dalam job ini
         type: Sequelize.INTEGER
+      },
+      highlight: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

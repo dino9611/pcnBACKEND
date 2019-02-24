@@ -8,13 +8,17 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false
       },
-      jobCategoryId: {
+      jobRoleId: {
         type: DataTypes.INTEGER,
         allowNull: false
       },
       experience: {
         // berapa tahun pengalaman dalam job ini
         type: DataTypes.INTEGER
+      },
+      highlight: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       }
     },
     {}
