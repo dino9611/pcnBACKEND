@@ -3,16 +3,16 @@ import express from 'express';
 import { Province } from '../database/models';
 import sequelize from '../database/sequelize';
 import {
-  basicAuth,
   errorResponse,
   pagingParams,
+  publicAuth,
   responseStatus
 } from '../helper';
 
 const router = express.Router();
 const Op = sequelize.Op;
 
-router.use(basicAuth);
+router.use(publicAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { offset, limit, province } = req.query;

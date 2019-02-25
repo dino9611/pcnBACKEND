@@ -3,19 +3,19 @@ import express from 'express';
 import sequelize from '../database/sequelize';
 import { Skill } from '../database/models';
 import {
-  basicAuth,
   errorResponse,
+  jwtAuth,
   pagingParams,
-  responseStatus,
-  tokenAuth
+  publicAuth,
+  responseStatus
 } from '../helper';
 
 const router = express.Router();
 const Op = sequelize.Op;
 
-// router.use(tokenAuth);
+// router.use(jwtAuth);
 
-router.get('/', basicAuth, pagingParams, (req, res) => {
+router.get('/', publicAuth, pagingParams, (req, res) => {
   const { offset, limit, skill } = req.query;
   let whereClause = {};
 
@@ -46,7 +46,7 @@ router.get('/', basicAuth, pagingParams, (req, res) => {
     });
 });
 
-router.get('/:id', basicAuth, (req, res) => {
+router.get('/:id', publicAuth, (req, res) => {
   Skill.findByPk(req.params.id, {
     attributes: [ 'skill' ]
   }).
@@ -62,7 +62,7 @@ router.get('/:id', basicAuth, (req, res) => {
     });
 });
 
-router.post('/', tokenAuth, checkBody([{ field: 'skill' }]), (req, res) => {
+router.post('/', jwtAuth, checkBody([{ field: 'skill' }]), (req, res) => {
   try {
     const { skill } = req.body;
 
@@ -86,7 +86,7 @@ router.post('/', tokenAuth, checkBody([{ field: 'skill' }]), (req, res) => {
   }
 });
 
-router.put('/:id', tokenAuth, (req, res) => {
+router.put('/:id', jwtAuth, (req, res) => {
   Skill.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
@@ -118,7 +118,7 @@ router.put('/:id', tokenAuth, (req, res) => {
     });
 });
 
-router.delete('/:id', tokenAuth, (req, res) => {
+router.delete('/:id', jwtAuth, (req, res) => {
   Skill.findByPk(req.params.id).
     then(obj => {
       if (!obj) {

@@ -9,15 +9,15 @@ import {
   encrypt,
   errorResponse,
   generateHash,
+  jwtAuth,
   pagingParams,
-  responseStatus,
-  tokenAuth
+  responseStatus
 } from '../helper';
 
 const appKey = config.APPKEY || 'careernetwork';
 const router = express.Router();
 
-router.use(tokenAuth);
+router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { offset, limit } = req.query;

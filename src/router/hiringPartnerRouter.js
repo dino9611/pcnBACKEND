@@ -9,9 +9,9 @@ import {
   errorResponse,
   generateHash,
   generateHiringPartnerSlug,
+  jwtAuth,
   pagingParams,
   responseStatus,
-  tokenAuth,
   uploader
 } from '../helper';
 import { HiringPartner, User } from '../database/models';
@@ -21,7 +21,7 @@ const hostName = config.HOSTNAME;
 const router = express.Router();
 const path = '/files/hiring_partner';
 
-router.use(tokenAuth);
+router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { limit, offset, name, slug } = req.query;

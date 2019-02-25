@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "basic-auth": "^2.0.1",
     "bcrypt": "^3.0.4",
     "body-parser": "^1.18.3",
     "crypto": "^1.0.1",

@@ -1,21 +1,21 @@
 import express from 'express';
 import { HiringPartnerRegistration } from '../database/models';
 import sequelize from '../database/sequelize';
-import {
-  basicAuth,
-  errorResponse,
-  pagingParams,
-  responseStatus,
-  tokenAuth
-} from '../helper';
 import { checkBody, validationType } from '../lib/validator';
+import {
+  errorResponse,
+  jwtAuth,
+  pagingParams,
+  publicAuth,
+  responseStatus
+} from '../helper';
 
 const router = express.Router();
 const Op = sequelize.Op;
 
-// router.use(basicAuth);
+// router.use(publicAuth);
 
-router.get('/', tokenAuth, pagingParams, (req, res) => {
+router.get('/', jwtAuth, pagingParams, (req, res) => {
   const { offset, limit, name, email, companyName } = req.query;
   let whereClause = {};
 
@@ -72,7 +72,7 @@ router.get('/', tokenAuth, pagingParams, (req, res) => {
     });
 });
 
-router.get('/:id', tokenAuth, (req, res) => {
+router.get('/:id', jwtAuth, (req, res) => {
   HiringPartnerRegistration.findByPk(req.params.id, {
     attributes: [
       'name',
@@ -105,7 +105,7 @@ router.get('/:id', tokenAuth, (req, res) => {
 
 router.post(
   '/',
-  basicAuth,
+  publicAuth,
   checkBody([
     { field: 'name' },
     { field: 'email', validationType: validationType.isEmail },
@@ -154,7 +154,7 @@ router.post(
   }
 );
 
-router.put('/:id', tokenAuth, (req, res) => {
+router.put('/:id', jwtAuth, (req, res) => {
   HiringPartnerRegistration.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
@@ -206,7 +206,7 @@ router.put('/:id', tokenAuth, (req, res) => {
     });
 });
 
-router.delete('/:id', tokenAuth, (req, res) => {
+router.delete('/:id', jwtAuth, (req, res) => {
   HiringPartnerRegistration.findByPk(req.params.id).
     then(obj => {
       if (!obj) {

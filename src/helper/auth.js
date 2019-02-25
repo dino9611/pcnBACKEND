@@ -1,4 +1,3 @@
-import auth from 'basic-auth';
 import config from '../config.json';
 import jwt from 'jsonwebtoken';
 import { responseStatus } from './';
@@ -29,7 +28,7 @@ export const validateBearerToken = (req, res, next) => {
   }
 };
 
-export const tokenAuth = (req, res, next) => {
+export const jwtAuth = (req, res, next) => {
   if (req.method !== 'OPTIONS') {
     // let success = true;
     jwt.verify(req.token, jwtKey, (error, decoded) => {
@@ -48,11 +47,11 @@ export const tokenAuth = (req, res, next) => {
   }
 };
 
-export const basicAuth = (req, res, next) => {
+export const publicAuth = (req, res, next) => {
   if (req.method !== 'OPTIONS') {
-    const user = auth(req);
+    const token = req.token;
 
-    if (user && user.name === 'pwdkdeveloper' && user.pass === config.BASICAUTHKEY) {
+    if (token && token === config.PUBLICTOKEN) {
       return next();
     }
 

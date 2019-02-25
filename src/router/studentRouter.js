@@ -9,9 +9,9 @@ import {
   errorResponse,
   generateHash,
   generateStudentSlug,
+  jwtAuth,
   pagingParams,
   responseStatus,
-  tokenAuth,
   uploader
 } from '../helper';
 import { Student, StudentResume, User } from '../database/models';
@@ -22,7 +22,7 @@ const router = express.Router();
 const path = '/files/student';
 const Op = sequelize.Op;
 
-router.use(tokenAuth);
+router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { limit, offset, name, code, slug, available } = req.query;

@@ -5,9 +5,9 @@ import sequelize from '../database/sequelize';
 import { SuccessStory } from '../database/models';
 import { validate } from '../lib/validator/core';
 import {
-  basicAuth,
   errorResponse,
   pagingParams,
+  publicAuth,
   responseStatus,
   uploader
 } from '../helper';
@@ -17,7 +17,7 @@ const router = express.Router();
 const path = '/files/successStory';
 const Op = sequelize.Op;
 
-router.use(basicAuth);
+router.use(publicAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { limit, offset, name, type } = req.query;

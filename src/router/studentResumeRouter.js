@@ -4,15 +4,15 @@ import sequelize from '../database/sequelize';
 import { StudentResume } from '../database/models';
 import {
   errorResponse,
+  jwtAuth,
   pagingParams,
-  responseStatus,
-  tokenAuth
+  responseStatus
 } from '../helper';
 
 const router = express.Router();
 const Op = sequelize.Op;
 
-router.use(tokenAuth);
+router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
   const { offset, limit, name } = req.query;
