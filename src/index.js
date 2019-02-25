@@ -13,12 +13,17 @@ import {
   ProgramRouter,
   ProvinceRouter,
   SkillRouter,
+  StudentEducationRouter,
   StudentHiredReportRouter,
   StudentInvitationRescheduleRouter,
   StudentInvitationRouter,
+  StudentJobInterestRouter,
+  StudentProgramRouter,
   StudentResignedReportRouter,
   StudentResumeRouter,
   StudentRouter,
+  StudentSkillRouter,
+  StudentWorkExperienceRouter,
   SuccessStoryRouter
 } from './router';
 
@@ -58,12 +63,17 @@ app.use('/logins', LoginRouter);
 app.use('/programs', ProgramRouter);
 app.use('/provinces', ProvinceRouter);
 app.use('/skills', SkillRouter);
+app.use('/student-educations', StudentEducationRouter);
 app.use('/student-hired-reports', StudentHiredReportRouter);
 app.use('/student-reschedule-invitations', StudentInvitationRescheduleRouter);
 app.use('/student-invitations', StudentInvitationRouter);
+app.use('/student-job-interests', StudentJobInterestRouter);
+app.use('/student-programs', StudentProgramRouter);
 app.use('/student-resigned-reports', StudentResignedReportRouter);
 app.use('/student-resumes', StudentResumeRouter);
 app.use('/students', StudentRouter);
+app.use('/student-skills', StudentSkillRouter);
+app.use('/student-work-experiences', StudentWorkExperienceRouter);
 app.use('/success-stories', SuccessStoryRouter);
 
 // list of router

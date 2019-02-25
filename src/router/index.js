@@ -14,3 +14,8 @@ export * from './studentInvitationRouter';
 export * from './studentInvitationRescheduleRouter';
 export * from './studentHiredReportRouter';
 export * from './studentResignedReportRouter';
+export * from './studentEducationRouter';
+export * from './studentJobInterestRouter';
+export * from './studentProgramRouter';
+export * from './studentSkillRouter';
+export * from './studentWorkExperienceRouter';
