@@ -10,3 +10,7 @@ export * from './skillRouter';
 export * from './studentResumeRouter';
 export * from './studentRouter';
 export * from './successStoryRouter';
+export * from './studentInvitationRouter';
+export * from './studentInvitationRescheduleRouter';
+export * from './studentHiredReportRouter';
+export * from './studentResignedReportRouter';

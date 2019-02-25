@@ -13,6 +13,10 @@ import {
   ProgramRouter,
   ProvinceRouter,
   SkillRouter,
+  StudentHiredReportRouter,
+  StudentInvitationRescheduleRouter,
+  StudentInvitationRouter,
+  StudentResignedReportRouter,
   StudentResumeRouter,
   StudentRouter,
   SuccessStoryRouter
@@ -54,6 +58,10 @@ app.use('/logins', LoginRouter);
 app.use('/programs', ProgramRouter);
 app.use('/provinces', ProvinceRouter);
 app.use('/skills', SkillRouter);
+app.use('/student-hired-reports', StudentHiredReportRouter);
+app.use('/student-reschedule-invitations', StudentInvitationRescheduleRouter);
+app.use('/student-invitations', StudentInvitationRouter);
+app.use('/student-resigned-reports', StudentResignedReportRouter);
 app.use('/student-resumes', StudentResumeRouter);
 app.use('/students', StudentRouter);
 app.use('/success-stories', SuccessStoryRouter);
