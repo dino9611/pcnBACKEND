@@ -15,8 +15,7 @@ module.exports = {
       },
       email: {
         allowNull: false,
-        type: Sequelize.STRING,
-        unique: true
+        type: Sequelize.STRING
       },
       phoneNumber: {
         type: Sequelize.STRING
@@ -35,6 +34,9 @@ module.exports = {
       },
       supportingValue: {
         type: Sequelize.STRING
+      },
+      processed: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,

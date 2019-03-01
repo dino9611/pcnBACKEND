@@ -10,8 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       email: {
         allowNull: false,
-        type: DataTypes.STRING,
-        unique: true
+        type: DataTypes.STRING
       },
       phoneNumber: {
         type: DataTypes.STRING
@@ -30,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       supportingValue: {
         type: DataTypes.STRING
+      },
+      processed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       }
     },
     {}
