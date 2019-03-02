@@ -1,7 +1,7 @@
+import auth from 'basic-auth';
 import config from '../config.json';
 import express from 'express';
 import { Admin, HiringPartner, Student, User } from '../database/models';
-import { checkBody, validationType } from '../lib/validator';
 import {
   compareHash,
   createJWTToken,
@@ -13,16 +13,13 @@ import {
 const router = express.Router();
 
 router.post(
-  '/',
-  checkBody([
-    // encrypted password
-    { field: 'ep' },
-    { field: 'email', validationType: validationType.isEmail }
-  ]),
+  '/:type',
   (req, res) => {
-    const { email, ep, type } = req.body;
+    const { type } = req.params;
+    const user = auth(req);
+    const { name, pass } = user;
     const appKey = config.APPKEY || 'careernetwork';
-    const password = decrypt(appKey, ep);
+    const password = decrypt(appKey, pass);
 
     const response = {
       ...{
@@ -32,7 +29,7 @@ router.post(
     };
     let whereClause = {};
 
-    whereClause = Object.assign(whereClause, { email, type });
+    whereClause = Object.assign(whereClause, { email: name, type });
     User.findOne({
       where: whereClause
     }).

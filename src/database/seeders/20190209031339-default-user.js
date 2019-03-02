@@ -9,7 +9,7 @@ module.exports = {
       'Users',
       [
         {
-          email: 'admin@purwadhika-career.com',
+          email: 'admin@purwadhika.com',
           password:
             '$2b$10$3dmSV4G5ALXPHI4HS.BCXuIG8PGUCu1e7YUhN/.KvgfHq5g4AibTi',
           type: 'admin',
