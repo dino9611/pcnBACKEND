@@ -27,7 +27,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
   JobRole.findAll({
     where: whereClause,
-    attributes: [ 'jobRole' ],
+    attributes: [ 'id', 'jobRole' ],
     offset,
     limit
   }).
