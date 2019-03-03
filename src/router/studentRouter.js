@@ -27,6 +27,7 @@ router.use(jwtAuth);
 router.get('/', pagingParams, (req, res) => {
   const { limit, offset, name, code, slug, available } = req.query;
   let whereClause = {};
+  const orClause = [];
 
   if (available !== undefined) {
     whereClause = Object.assign(whereClause, {
@@ -35,14 +36,40 @@ router.get('/', pagingParams, (req, res) => {
   }
 
   if (name) {
-    whereClause = Object.assign(whereClause, {
-      name: { [Op.like]: `%${name}%` }
-    });
+    orClause.push(
+      {
+        name: { [Op.like]: `%${name}%` }
+      }
+    );
+
+    // whereClause = Object.assign(whereClause, {
+    //   [Op.or]: [
+    //     {
+    //       name: { [Op.like]: `%${name}%` }
+    //     }
+    //   ]
+    // });
   }
 
   if (code) {
+    orClause.push(
+      {
+        code: { [Op.like]: `%${code}%` }
+      }
+    );
+
+    // whereClause = Object.assign(whereClause, {
+    //   [Op.or]: [
+    //     {
+    //       code: { [Op.like]: `%${code}%` }
+    //     }
+    //   ]
+    // });
+  }
+
+  if (orClause.length > 0) {
     whereClause = Object.assign(whereClause, {
-      code
+      [Op.or]: orClause
     });
   }
 
@@ -161,8 +188,7 @@ router.post('/', (req, res) => {
           { field: 'code' },
           { field: 'email', validationType: validationType.isEmail },
           { field: 'ep' },
-          { field: 'name' },
-          { field: 'phoneNumber' }
+          { field: 'name' }
         ],
         req.body
       );
@@ -202,7 +228,7 @@ router.post('/', (req, res) => {
                     slug,
                     code,
                     name,
-                    phoneNumber,
+                    phoneNumber: phoneNumber || '',
                     province,
                     city,
                     address,
