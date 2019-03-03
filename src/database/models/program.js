@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         unique: true
       },
-      programName: {
+      program: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true

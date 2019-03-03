@@ -14,7 +14,7 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true
       },
-      programName: {
+      program: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
