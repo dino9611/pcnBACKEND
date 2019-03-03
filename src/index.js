@@ -24,7 +24,8 @@ import {
   StudentRouter,
   StudentSkillRouter,
   StudentWorkExperienceRouter,
-  SuccessStoryRouter
+  SuccessStoryRouter,
+  ValidateTokenRouter
 } from './router';
 
 const app = express();
@@ -75,6 +76,7 @@ app.use('/students', StudentRouter);
 app.use('/student-skills', StudentSkillRouter);
 app.use('/student-work-experiences', StudentWorkExperienceRouter);
 app.use('/success-stories', SuccessStoryRouter);
+app.use('/validate-token', ValidateTokenRouter);
 
 // list of router
 

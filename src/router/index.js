@@ -19,3 +19,4 @@ export * from './studentJobInterestRouter';
 export * from './studentProgramRouter';
 export * from './studentSkillRouter';
 export * from './studentWorkExperienceRouter';
+export * from './validateTokenRouter';

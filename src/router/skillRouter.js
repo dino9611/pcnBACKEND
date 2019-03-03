@@ -27,7 +27,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
   Skill.findAll({
     where: whereClause,
-    attributes: [ 'skill' ],
+    attributes: [ 'id', 'skill' ],
     offset,
     limit
   }).
@@ -79,7 +79,15 @@ router.post('/', jwtAuth, checkBody([{ field: 'skill' }]), (req, res) => {
         });
       }).
       catch(error => {
-        return errorResponse(error, res);
+        let errorMessage = '';
+
+        if (error.name) {
+          if (error.name === 'SequelizeUniqueConstraintError') {
+            errorMessage = 'Validation error : some field value must be unique.';
+          }
+        }
+
+        return errorResponse(error, res, errorMessage);
       });
   } catch (error) {
     return errorResponse(error, res);
