@@ -29,11 +29,9 @@ router.get('/', pagingParams, (req, res) => {
       provinceId
     });
   }
-  console.log(whereClause, provinceId);
   City.findAll({
     where: whereClause,
     attributes: [ 'city' ],
-    logging: console.log,
     offset,
     limit
   }).

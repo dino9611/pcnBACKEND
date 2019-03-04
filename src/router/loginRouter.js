@@ -91,7 +91,7 @@ router.post(
                     result: {
                       id: obj.id,
                       name: obj.name,
-                      type: 'hiring_partner',
+                      type: 'hiring-partner',
                       token,
                       useHiringFee: obj.useHiringFee
                     }

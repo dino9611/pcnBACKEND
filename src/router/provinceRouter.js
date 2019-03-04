@@ -26,7 +26,7 @@ router.get('/', pagingParams, (req, res) => {
 
   Province.findAll({
     where: whereClause,
-    attributes: [ 'province' ],
+    attributes: [ 'id', 'province' ],
     offset,
     limit
   }).
