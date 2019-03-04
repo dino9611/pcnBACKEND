@@ -16,12 +16,19 @@ import {
 
 const appKey = config.APPKEY || 'careernetwork';
 const router = express.Router();
+const Op = sequelize.Op;
 
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit } = req.query;
-  const whereClause = {};
+  const { offset, limit, name } = req.query;
+  let whereClause = {};
+
+  if (name) {
+    whereClause = Object.assign(whereClause, {
+      name: { [Op.like]: `%${name}%` }
+    });
+  }
 
   Admin.findAll({
     where: whereClause,

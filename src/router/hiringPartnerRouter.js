@@ -20,6 +20,7 @@ const appKey = config.APPKEY;
 const hostName = config.HOSTNAME;
 const router = express.Router();
 const path = '/files/hiring_partner';
+const Op = sequelize.Op;
 
 router.use(jwtAuth);
 
@@ -28,7 +29,9 @@ router.get('/', pagingParams, (req, res) => {
   let whereClause = {};
 
   if (name) {
-    whereClause = Object.assign(whereClause, { name: { $like: `%${name}%` }});
+    whereClause = Object.assign(whereClause, {
+      name: { [Op.like]: `%${name}%` }
+    });
   }
 
   if (slug) {
@@ -135,8 +138,7 @@ router.post('/', (req, res) => {
           // encrypted password
           { field: 'ep' },
           { field: 'email', validationType: validationType.isEmail },
-          { field: 'name' },
-          { field: 'phoneNumber' }
+          { field: 'name' }
         ],
         req.body
       );
@@ -174,7 +176,7 @@ router.post('/', (req, res) => {
                     id: result.id,
                     slug,
                     name,
-                    phoneNumber,
+                    phoneNumber: phoneNumber || '',
                     province,
                     city,
                     address,
