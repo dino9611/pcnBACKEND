@@ -76,7 +76,7 @@ router.post(
             catch(error => {
               return errorResponse(error, res);
             });
-        } else if (usr.type === 'hiring_partner') {
+        } else if (usr.type === 'hiring-partner') {
           HiringPartner.findByPk(usr.id).
             then(obj => {
               usr.

@@ -167,7 +167,7 @@ router.post('/', (req, res) => {
                   profilePicture: profilePicture ?
                     `${hostName}${ppPath}` :
                     null,
-                  type: 'hiring_partner'
+                  type: 'hiring-partner'
                 },
                 { transaction: tr }
               ).then(result => {
