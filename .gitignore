@@ -18,3 +18,5 @@ src/config.json
 
 # ignore public folder
 /src/public
+
+.htaccess
