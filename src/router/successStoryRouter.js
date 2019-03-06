@@ -6,6 +6,7 @@ import { SuccessStory } from '../database/models';
 import { validate } from '../lib/validator/core';
 import {
   errorResponse,
+  jwtAuth,
   pagingParams,
   publicAuth,
   responseStatus,
@@ -17,9 +18,7 @@ const router = express.Router();
 const path = '/files/successStory';
 const Op = sequelize.Op;
 
-router.use(publicAuth);
-
-router.get('/', pagingParams, (req, res) => {
+router.get('/', publicAuth, pagingParams, (req, res) => {
   const { limit, offset, name, type } = req.query;
   let whereClause = {};
 
@@ -38,7 +37,8 @@ router.get('/', pagingParams, (req, res) => {
   SuccessStory.findAll({
     where: whereClause,
     offset,
-    limit
+    limit,
+    order: [ 'type', 'position' ]
   }).
     then(result => {
       if (!result) {
@@ -71,7 +71,7 @@ router.get('/', pagingParams, (req, res) => {
     });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', publicAuth, (req, res) => {
   SuccessStory.findByPk(req.params.id, {
     attributes: [
       'id',
@@ -103,7 +103,7 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.post('/', (req, res) => {
+router.post('/', jwtAuth, (req, res) => {
   const upload = uploader(path, 'SS', {
     photo: 'jpg|jpeg|png'
   }).fields([{ name: 'photo' }]);
@@ -178,7 +178,7 @@ router.post('/', (req, res) => {
   }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', jwtAuth, (req, res) => {
   const upload = uploader(path, 'SS', {
     photo: 'jpg|jpeg|png'
   }).fields([{ name: 'photo' }]);
@@ -268,7 +268,7 @@ router.put('/:id', (req, res) => {
   }
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', jwtAuth, (req, res) => {
   SuccessStory.findByPk(req.params.id).
     then(obj => {
       if (!obj) {

@@ -27,14 +27,14 @@ module.exports = {
       },
       additionalInfo: {
         // isinya json, array of string
-        type: Sequelize.STRING
+        type: Sequelize.STRING(1000)
       },
       video: {
         type: Sequelize.STRING
       },
       qna: {
         // isinya json, array of object
-        type: Sequelize.STRING
+        type: Sequelize.STRING(1000)
       },
       position: {
         type: Sequelize.INTEGER,
