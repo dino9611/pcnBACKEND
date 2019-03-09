@@ -28,10 +28,10 @@ module.exports = {
         onDelete: 'cascade'
       },
       batch: {
-        type: Sequelize.STRING(4)
+        type: Sequelize.INTEGER
       },
       year: {
-        type: Sequelize.STRING(4)
+        type: Sequelize.INTEGER
       },
       highlight: {
         type: Sequelize.BOOLEAN,

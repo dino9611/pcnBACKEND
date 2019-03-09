@@ -1,12 +1,12 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
-import { StudentProgram } from '../database/models';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
   responseStatus
 } from '../helper';
+import { Program, StudentProgram } from '../database/models';
 
 const router = express.Router();
 
@@ -19,7 +19,11 @@ router.get('/', pagingParams, (req, res) => {
   StudentProgram.findAll({
     where: whereClause,
     offset,
-    limit
+    limit,
+    include: [
+      { model: Program, as: 'program', attributes: [ 'id', 'program' ]}
+    ],
+    order: [[ 'year', 'DESC' ], [ 'batch', 'DESC' ]]
   }).
     then(result => {
       StudentProgram.count({ where: whereClause }).then(total => {
