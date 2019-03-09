@@ -33,6 +33,10 @@ module.exports = {
       year: {
         type: Sequelize.STRING(4)
       },
+      highlight: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -23,8 +23,14 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  StudentResume.associate = function () {
+  StudentResume.associate = function (models) {
     // associations can be defined here
+    StudentResume.belongsTo(models.Student, { foreignKey: 'id', as: 'student' });
+    StudentResume.hasMany(models.StudentProgram, { foreignKey: 'studentResumeId', as: 'studentProgram' });
+    StudentResume.hasMany(models.StudentSkill, { foreignKey: 'studentResumeId', as: 'studentSkill' });
+    StudentResume.hasMany(models.StudentWorkExperience, { foreignKey: 'studentResumeId', as: 'studentWorkExperience' });
+    StudentResume.hasMany(models.StudentEducation, { foreignKey: 'studentResumeId', as: 'studentEducation' });
+    StudentResume.hasMany(models.StudentJobInterest, { foreignKey: 'studentResumeId', as: 'studentJobInterest' });
   };
 
   return StudentResume;

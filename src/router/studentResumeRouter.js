@@ -1,20 +1,31 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
 import sequelize from '../database/sequelize';
-import { StudentResume } from '../database/models';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
+  publicAuth,
   responseStatus
 } from '../helper';
+import {
+  JobRole,
+  Program,
+  Skill,
+  Student,
+  StudentEducation,
+  StudentJobInterest,
+  StudentProgram,
+  StudentResume,
+  StudentSkill,
+  StudentWorkExperience,
+  User
+} from '../database/models';
 
 const router = express.Router();
 const Op = sequelize.Op;
 
-router.use(jwtAuth);
-
-router.get('/', pagingParams, (req, res) => {
+router.get('/', publicAuth, pagingParams, (req, res) => {
   const { offset, limit, name } = req.query;
   let whereClause = {};
 
@@ -44,8 +55,82 @@ router.get('/', pagingParams, (req, res) => {
     });
 });
 
-router.get('/:id', (req, res) => {
-  StudentResume.findByPk(req.params.id).
+router.get('/:id', publicAuth, (req, res) => {
+  StudentResume.findByPk(req.params.id, {
+    attributes: [
+      'id',
+      'headline',
+      'summary',
+      'jobPreferences',
+      'baseSalary',
+      'profileVideo'
+    ],
+    include: [
+      {
+        model: Student,
+        as: 'student',
+        attributes: [
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'birthDate',
+          'gender',
+          'isAvailable'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
+      },
+      {
+        model: StudentSkill,
+        as: 'studentSkill',
+        attributes: [ 'id', 'position' ],
+        include: [{ model: Skill, as: 'skill', attributes: [ 'id', 'skill' ]}]
+      },
+      {
+        model: StudentProgram,
+        as: 'studentProgram',
+        attributes: [ 'id', 'batch', 'year', 'highlight' ],
+        include: [
+          { model: Program, as: 'program', attributes: [ 'id', 'program' ]}
+        ]
+      },
+      {
+        model: StudentWorkExperience,
+        as: 'studentWorkExperience',
+        attributes: [ 'id', 'jobTitle', 'company', 'from', 'to', 'description' ]
+      },
+      {
+        model: StudentEducation,
+        as: 'studentEducation',
+        attributes: [
+          'id',
+          'institution',
+          'degree',
+          'startDate',
+          'endDate',
+          'description'
+        ]
+      },
+      {
+        model: StudentJobInterest,
+        as: 'studentJobInterest',
+        attributes: [ 'id', 'experience', 'highlight' ],
+        include: [
+          { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
+        ]
+      }
+    ],
+    order: [
+      [{ StudentJobInterest, as: 'studentJobInterest' }, 'studentJobInterest.highlight', 'DESC' ]
+    ]
+  }).
     then(result => {
       res.json({
         status: result ? responseStatus.SUCCESS : responseStatus.NOT_FOUND,
@@ -60,6 +145,7 @@ router.get('/:id', (req, res) => {
 
 router.post(
   '/',
+  jwtAuth,
   checkBody([
     { field: 'studentId' },
     { field: 'headline' },
@@ -102,7 +188,7 @@ router.post(
   }
 );
 
-router.put('/:id', (req, res) => {
+router.put('/:id', jwtAuth, (req, res) => {
   StudentResume.findByPk(req.params.id).
     then(obj => {
       if (!obj) {
@@ -111,12 +197,7 @@ router.put('/:id', (req, res) => {
           message: 'Data not found !'
         });
       }
-      const {
-        headline,
-        summary,
-        jobPreferences,
-        baseSalary
-      } = req.body;
+      const { headline, summary, jobPreferences, baseSalary } = req.body;
 
       obj.
         update({
@@ -142,7 +223,7 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', jwtAuth, (req, res) => {
   StudentResume.findByPk(req.params.id).
     then(obj => {
       if (!obj) {

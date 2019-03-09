@@ -24,8 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  StudentJobInterest.associate = function () {
+  StudentJobInterest.associate = function (models) {
     // associations can be defined here
+    StudentJobInterest.belongsTo(models.JobRole, { foreignKey: 'jobRoleId', as: 'jobRole' });
   };
 
   return StudentJobInterest;

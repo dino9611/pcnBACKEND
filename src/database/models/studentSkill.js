@@ -20,8 +20,9 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  StudentSkill.associate = function () {
+  StudentSkill.associate = function (models) {
     // associations can be defined here
+    StudentSkill.belongsTo(models.Skill, { foreignKey: 'skillId', as: 'skill' });
   };
 
   return StudentSkill;

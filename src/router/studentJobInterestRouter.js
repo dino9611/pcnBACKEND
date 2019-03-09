@@ -1,25 +1,35 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
-import { StudentJobInterest } from '../database/models';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
   responseStatus
 } from '../helper';
+import { JobRole, StudentJobInterest } from '../database/models';
 
 const router = express.Router();
 
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit } = req.query;
-  const whereClause = {};
+  const { offset, limit, studentResumeId } = req.query;
+  let whereClause = {};
+
+  if (studentResumeId) {
+    whereClause = Object.assign(whereClause, {
+      studentResumeId
+    });
+  }
 
   StudentJobInterest.findAll({
     where: whereClause,
     offset,
-    limit
+    limit,
+    include: [
+      { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
+    ],
+    order: [[ 'highlight', 'DESC' ]]
   }).
     then(result => {
       StudentJobInterest.count({ where: whereClause }).then(total => {
@@ -108,7 +118,9 @@ router.put('/:id', (req, res) => {
         update({
           jobRoleId: jobRoleId || obj.jobRoleId,
           experience: experience || obj.experience,
-          highlight: highlight || obj.highlight
+          highlight: highlight === 'undefined' ?
+            obj.highlight :
+            highlight
         }).
         then(() =>
           res.json({

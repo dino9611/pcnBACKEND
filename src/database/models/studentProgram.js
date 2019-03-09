@@ -17,13 +17,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       year: {
         type: DataTypes.STRING(4)
+      },
+      highlight: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       }
     },
     {}
   );
 
-  StudentProgram.associate = function () {
+  StudentProgram.associate = function (models) {
     // associations can be defined here
+    StudentProgram.belongsTo(models.Program, { foreignKey: 'programId', as: 'program' });
   };
 
   return StudentProgram;
