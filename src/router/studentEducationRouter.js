@@ -19,7 +19,8 @@ router.get('/', pagingParams, (req, res) => {
   StudentEducation.findAll({
     where: whereClause,
     offset,
-    limit
+    limit,
+    order: [[ 'endDate', 'DESC' ]]
   }).
     then(result => {
       StudentEducation.count({ where: whereClause }).then(total => {
