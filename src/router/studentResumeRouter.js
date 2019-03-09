@@ -38,7 +38,48 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
   StudentResume.findAll({
     where: whereClause,
     offset,
-    limit
+    limit,
+    include: [
+      {
+        model: StudentSkill,
+        as: 'studentSkill',
+        attributes: [ 'id', 'position' ],
+        include: [{ model: Skill, as: 'skill', attributes: [ 'id', 'skill' ]}]
+      },
+      {
+        model: StudentProgram,
+        as: 'studentProgram',
+        attributes: [ 'id', 'batch', 'year', 'highlight' ],
+        include: [
+          { model: Program, as: 'program', attributes: [ 'id', 'program' ]}
+        ]
+      },
+      {
+        model: StudentWorkExperience,
+        as: 'studentWorkExperience',
+        attributes: [ 'id', 'jobTitle', 'company', 'from', 'to', 'description' ]
+      },
+      {
+        model: StudentEducation,
+        as: 'studentEducation',
+        attributes: [
+          'id',
+          'institution',
+          'degree',
+          'startDate',
+          'endDate',
+          'description'
+        ]
+      },
+      {
+        model: StudentJobInterest,
+        as: 'studentJobInterest',
+        attributes: [ 'id', 'experience', 'highlight' ],
+        include: [
+          { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
+        ]
+      }
+    ]
   }).
     then(result => {
       StudentResume.count({ where: whereClause }).then(total => {
@@ -86,49 +127,7 @@ router.get('/:id', publicAuth, (req, res) => {
             attributes: [ 'email', 'profilePicture', 'type' ]
           }
         ]
-      },
-      {
-        model: StudentSkill,
-        as: 'studentSkill',
-        attributes: [ 'id', 'position' ],
-        include: [{ model: Skill, as: 'skill', attributes: [ 'id', 'skill' ]}]
-      },
-      {
-        model: StudentProgram,
-        as: 'studentProgram',
-        attributes: [ 'id', 'batch', 'year', 'highlight' ],
-        include: [
-          { model: Program, as: 'program', attributes: [ 'id', 'program' ]}
-        ]
-      },
-      {
-        model: StudentWorkExperience,
-        as: 'studentWorkExperience',
-        attributes: [ 'id', 'jobTitle', 'company', 'from', 'to', 'description' ]
-      },
-      {
-        model: StudentEducation,
-        as: 'studentEducation',
-        attributes: [
-          'id',
-          'institution',
-          'degree',
-          'startDate',
-          'endDate',
-          'description'
-        ]
-      },
-      {
-        model: StudentJobInterest,
-        as: 'studentJobInterest',
-        attributes: [ 'id', 'experience', 'highlight' ],
-        include: [
-          { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
-        ]
       }
-    ],
-    order: [
-      [{ StudentJobInterest, as: 'studentJobInterest' }, 'studentJobInterest.highlight', 'DESC' ]
     ]
   }).
     then(result => {
@@ -160,7 +159,8 @@ router.post(
         headline,
         summary,
         jobPreferences,
-        baseSalary
+        baseSalary,
+        profileVideo
       } = req.body;
 
       StudentResume.create({
@@ -168,7 +168,8 @@ router.post(
         headline,
         summary,
         jobPreferences,
-        baseSalary
+        baseSalary,
+        profileVideo
       }).
         then(result => {
           return res.json({
@@ -197,14 +198,21 @@ router.put('/:id', jwtAuth, (req, res) => {
           message: 'Data not found !'
         });
       }
-      const { headline, summary, jobPreferences, baseSalary } = req.body;
+      const {
+        headline,
+        summary,
+        jobPreferences,
+        baseSalary,
+        profileVideo
+      } = req.body;
 
       obj.
         update({
           headline: headline || obj.headline,
           summary: summary || obj.summary,
           jobPreferences: jobPreferences || obj.jobPreferences,
-          baseSalary: baseSalary || obj.baseSalary
+          baseSalary: baseSalary || obj.baseSalary,
+          profileVideo: profileVideo || obj.profileVideo
         }).
         then(() =>
           res.json({
