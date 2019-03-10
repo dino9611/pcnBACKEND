@@ -41,6 +41,27 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
     limit,
     include: [
       {
+        model: Student,
+        as: 'student',
+        attributes: [
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'birthDate',
+          'gender',
+          'isAvailable'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
+      },
+      {
         model: StudentSkill,
         as: 'studentSkill',
         attributes: [ 'id', 'position' ],
