@@ -26,13 +26,40 @@ const router = express.Router();
 const Op = sequelize.Op;
 
 router.get('/', publicAuth, pagingParams, (req, res) => {
-  const { offset, limit, name } = req.query;
+  const { offset, limit, name, jobRoles, skills, jobPreferences } = req.query;
   let whereClause = {};
 
   if (name) {
     whereClause = Object.assign(whereClause, {
       name: { [Op.like]: `%${name}%` }
     });
+  }
+  if (jobPreferences && Array.isArray(jobPreferences) && jobPreferences.length > 0) {
+    const filter = jobPreferences.map(val => {
+      return { jobPreferences: { [Op.like]: `%${val}%` }};
+    });
+
+    whereClause = Object.assign(whereClause, { [Op.or]: filter });
+  }
+
+  let jiFilter = null;
+  let skillFilter = null;
+
+  if (jobRoles && Array.isArray(jobRoles) && jobRoles.length > 0) {
+    jiFilter = {};
+    const filter = jobRoles.map(val => {
+      return { jobRoleId: val };
+    });
+
+    jiFilter = Object.assign(jiFilter, { [Op.or]: filter });
+  }
+  if (skills && Array.isArray(skills) && skills.length > 0) {
+    skillFilter = {};
+    const filter = skills.map(val => {
+      return { skillId: val };
+    });
+
+    skillFilter = Object.assign(skillFilter, { [Op.or]: filter });
   }
 
   StudentResume.findAll({
@@ -65,7 +92,8 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         model: StudentSkill,
         as: 'studentSkill',
         attributes: [ 'id', 'position' ],
-        include: [{ model: Skill, as: 'skill', attributes: [ 'id', 'skill' ]}]
+        include: [{ model: Skill, as: 'skill', attributes: [ 'id', 'skill' ]}],
+        where: skillFilter
       },
       {
         model: StudentProgram,
@@ -98,8 +126,16 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         attributes: [ 'id', 'experience', 'highlight' ],
         include: [
           { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
-        ]
+        ],
+        where: jiFilter
       }
+    ],
+    order: [
+      [{ model: StudentSkill, as: 'studentSkill' }, 'position' ],
+      [{ model: StudentEducation, as: 'studentEducation' }, 'endDate', 'DESC' ],
+      [{ model: StudentJobInterest, as: 'studentJobInterest' }, 'highlight', 'DESC' ],
+      [{ model: StudentWorkExperience, as: 'studentWorkExperience' }, 'to', 'DESC' ],
+      [{ model: StudentProgram, as: 'studentProgram' }, 'highlight', 'DESC' ]
     ]
   }).
     then(result => {
