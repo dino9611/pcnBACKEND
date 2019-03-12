@@ -141,7 +141,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
       [{ model: StudentEducation, as: 'studentEducation' }, 'endDate', 'DESC' ],
       [{ model: StudentJobInterest, as: 'studentJobInterest' }, 'highlight', 'DESC' ],
       [{ model: StudentWorkExperience, as: 'studentWorkExperience' }, 'to', 'DESC' ],
-      [{ model: StudentProgram, as: 'studentProgram' }, 'highlight', 'DESC' ]
+      [{ model: StudentProgram, as: 'studentProgram' }, 'year', 'DESC' ]
     ]
   }).
     then(result => {
