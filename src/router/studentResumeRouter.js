@@ -26,7 +26,7 @@ const router = express.Router();
 const Op = sequelize.Op;
 
 router.get('/', publicAuth, pagingParams, (req, res) => {
-  const { offset, limit, name, jobRoles, skills, jobPreferences } = req.query;
+  const { offset, limit, name, jobRoles, skills, jobPreferences, slug } = req.query;
   let whereClause = {};
 
   if (name) {
@@ -44,6 +44,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
   let jiFilter = null;
   let skillFilter = null;
+  let studentFilter = null;
 
   if (jobRoles && Array.isArray(jobRoles) && jobRoles.length > 0) {
     jiFilter = {};
@@ -61,6 +62,9 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
     skillFilter = Object.assign(skillFilter, { [Op.or]: filter });
   }
+  if (slug) {
+    studentFilter = { slug };
+  }
 
   StudentResume.findAll({
     where: whereClause,
@@ -71,6 +75,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         model: Student,
         as: 'student',
         attributes: [
+          'slug',
           'name',
           'phoneNumber',
           'province',
@@ -80,6 +85,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
           'gender',
           'isAvailable'
         ],
+        where: studentFilter,
         include: [
           {
             model: User,
