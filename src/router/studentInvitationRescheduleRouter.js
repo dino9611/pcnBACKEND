@@ -1,14 +1,20 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
-import { StudentInvitationReschedule } from '../database/models';
+import sequelize from '../database/sequelize';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
   responseStatus
 } from '../helper';
+import {
+  StudentInvitation,
+  StudentInvitationReschedule
+} from '../database/models';
 
 const router = express.Router();
+
+const Op = sequelize.Op;
 
 router.use(jwtAuth);
 
@@ -62,19 +68,86 @@ router.post(
       const {
         studentInvitationId,
         scheduleDate,
+        status,
         location,
         message,
         proposedBy
       } = req.body;
 
-      StudentInvitationReschedule.create({
-        studentInvitationId,
-        status: 'proposed',
-        scheduleDate,
-        location: location || '',
-        message: message || '',
-        proposedBy
-      }).
+      // StudentInvitationReschedule.create({
+      //   studentInvitationId,
+      //   status: 'proposed',
+      //   scheduleDate,
+      //   location: location || '',
+      //   message: message || '',
+      //   proposedBy
+      // })
+
+      sequelize.
+        transaction(tr => {
+          return StudentInvitationReschedule.create(
+            {
+              studentInvitationId,
+              status: status || 'proposed',
+              scheduleDate,
+              location: location || '',
+              message: message || '',
+              proposedBy
+            },
+            { transaction: tr }
+          ).then(result => {
+            return StudentInvitation.update(
+              {
+                status: 'rescheduled'
+              },
+              {
+                where: { id: studentInvitationId },
+                transaction: tr
+              }
+            ).then(() => {
+              return StudentInvitationReschedule.update(
+                {
+                  status: 'rescheduled'
+                },
+                {
+                  where: {
+                    id: { [Op.ne]: result.id },
+                    studentInvitationId,
+                    status: 'proposed'
+                  },
+                  transaction: tr
+                }
+              ).then(() => {
+                return result;
+              });
+
+              // return result;
+            });
+
+            // let siStatus = 'proposed';
+
+            // if (status === 'accepted') {
+            //   siStatus = 'interview_accepted';
+
+            // } else if (status === 'proposed') {
+            //   return StudentInvitationReschedule.update(
+            //     {
+            //       status: 'rescheduled'
+            //     },
+            //     {
+            //       where: {
+            //         id: { [Op.ne]: result.id },
+            //         studentInvitationId,
+            //         status: 'proposed'
+            //       },
+            //       transaction: tr
+            //     }
+            //   ).then(() => {
+            //     return result;
+            //   });
+            // }
+          });
+        }).
         then(result => {
           return res.json({
             status: responseStatus.SUCCESS,
@@ -107,16 +180,41 @@ router.put('/:id', (req, res) => {
         scheduleDate,
         location,
         message,
-        proposedBy
+        proposedBy,
+        interviewRejectedReason
       } = req.body;
 
-      obj.
-        update({
-          status: status || obj.status,
-          scheduleDate: scheduleDate || obj.scheduleDate,
-          location: location || obj.location,
-          message: message || obj.message,
-          proposedBy: proposedBy || obj.proposedBy
+      sequelize.
+        transaction(tr => {
+          return obj.
+            update(
+              {
+                status: status || obj.status,
+                scheduleDate: scheduleDate || obj.scheduleDate,
+                location: location || obj.location,
+                message: message || obj.message,
+                proposedBy: proposedBy || obj.proposedBy
+              },
+              { transaction: tr }
+            ).
+            then(() => {
+              if (status === 'accepted') {
+                return StudentInvitation.update(
+                  { status: 'interview_accepted' },
+                  { where: { id: obj.studentInvitationId }, transaction: tr }
+                );
+              } else if (status === 'rejected' && proposedBy === 'student') {
+                return StudentInvitation.update(
+                  {
+                    status: 'interview_rejected',
+                    interviewRejectedReason: interviewRejectedReason || ''
+                  },
+                  { where: { id: obj.studentInvitationId }, transaction: tr }
+                );
+              }
+
+              return obj;
+            });
         }).
         then(() =>
           res.json({

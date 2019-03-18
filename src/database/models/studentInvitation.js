@@ -30,6 +30,9 @@ module.exports = (sequelize, DataTypes) => {
       interviewRejectedReason: {
         type: DataTypes.STRING(1000)
       },
+      interviewRejectedBy: {
+        type: DataTypes.STRING
+      },
       rejectedReason: {
         type: DataTypes.STRING(1000)
       }
@@ -37,8 +40,20 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  StudentInvitation.associate = function () {
+  StudentInvitation.associate = function (models) {
     // associations can be defined here
+    StudentInvitation.belongsTo(models.HiringPartner, {
+      foreignKey: 'hiringPartnerId',
+      as: 'hiringPartner'
+    });
+    StudentInvitation.belongsTo(models.Student, {
+      foreignKey: 'studentId',
+      as: 'student'
+    });
+    StudentInvitation.hasMany(models.StudentInvitationReschedule, {
+      foreignKey: 'studentInvitationId',
+      as: 'studentInvitationReschedule'
+    });
   };
 
   return StudentInvitation;

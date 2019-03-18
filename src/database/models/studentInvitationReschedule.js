@@ -31,8 +31,12 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  StudentInvitationReschedule.associate = function () {
+  StudentInvitationReschedule.associate = function (models) {
     // associations can be defined here
+    StudentInvitationReschedule.belongsTo(models.StudentInvitation, {
+      foreignKey: 'studentInvitationId',
+      as: 'studentInvitation'
+    });
   };
 
   return StudentInvitationReschedule;

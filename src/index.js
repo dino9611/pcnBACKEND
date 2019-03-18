@@ -66,7 +66,7 @@ app.use('/provinces', ProvinceRouter);
 app.use('/skills', SkillRouter);
 app.use('/student-educations', StudentEducationRouter);
 app.use('/student-hired-reports', StudentHiredReportRouter);
-app.use('/student-reschedule-invitations', StudentInvitationRescheduleRouter);
+app.use('/student-invitation-reschedules', StudentInvitationRescheduleRouter);
 app.use('/student-invitations', StudentInvitationRouter);
 app.use('/student-job-interests', StudentJobInterestRouter);
 app.use('/student-programs', StudentProgramRouter);

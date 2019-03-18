@@ -1,25 +1,105 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
-import { StudentInvitation } from '../database/models';
+import moment from 'moment';
+import sequelize from '../database/sequelize';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
   responseStatus
 } from '../helper';
+import {
+  HiringPartner,
+  Student,
+  StudentInvitation,
+  StudentInvitationReschedule,
+  User
+} from '../database/models';
 
 const router = express.Router();
+const Op = sequelize.Op;
 
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit } = req.query;
-  const whereClause = {};
+  const { offset, limit, status, studentId, hiringPartnerId } = req.query;
+  let whereClause = {
+    scheduleDate: {
+      [Op.gte]: moment().
+        subtract(7, 'days').
+        toDate()
+    }
+  };
+
+  if (status) {
+    whereClause = { ...whereClause, status };
+  }
+  if (studentId) {
+    whereClause = { ...whereClause, studentId };
+  }
+  if (hiringPartnerId) {
+    whereClause = { ...whereClause, hiringPartnerId };
+  }
 
   StudentInvitation.findAll({
     where: whereClause,
     offset,
-    limit
+    limit,
+    include: [
+      {
+        model: Student,
+        as: 'student',
+        attributes: [
+          'slug',
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'birthDate',
+          'gender',
+          'isAvailable'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
+      },
+      {
+        model: HiringPartner,
+        as: 'hiringPartner',
+        attributes: [
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'summary',
+          'teamSize',
+          'profileVideo',
+          'website',
+          'facebook',
+          'linkedin'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
+      },
+      {
+        model: StudentInvitationReschedule,
+        as: 'studentInvitationReschedule',
+        order: [[ 'updatedAt', 'DESC' ]],
+        limit: 1
+      }
+    ],
+    order: [[ 'scheduleDate' ]]
   }).
     then(result => {
       StudentInvitation.count({ where: whereClause }).then(total => {
@@ -67,6 +147,7 @@ router.post(
         location,
         message,
         interviewRejectedReason,
+        interviewRejectedBy,
         rejectedReason
       } = req.body;
 
@@ -78,6 +159,7 @@ router.post(
         location,
         message: message || '',
         interviewRejectedReason: interviewRejectedReason || '',
+        interviewRejectedBy: interviewRejectedBy || '',
         rejectedReason: rejectedReason || ''
       }).
         then(result => {
@@ -114,6 +196,7 @@ router.put('/:id', (req, res) => {
         location,
         message,
         interviewRejectedReason,
+        interviewRejectedBy,
         rejectedReason
       } = req.body;
 
@@ -124,7 +207,9 @@ router.put('/:id', (req, res) => {
           scheduleDate: scheduleDate || obj.scheduleDate,
           location: location || obj.location,
           message: message || obj.message,
-          interviewRejectedReason: interviewRejectedReason || obj.interviewRejectedReason,
+          interviewRejectedReason:
+            interviewRejectedReason || obj.interviewRejectedReason,
+          interviewRejectedBy: interviewRejectedBy || obj.interviewRejectedBy,
           rejectedReason: rejectedReason || obj.rejectedReason
         }).
         then(() =>
