@@ -29,7 +29,8 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
     where: whereClause,
     attributes: [ 'id', 'program', 'programCode' ],
     offset,
-    limit
+    limit,
+    order: [[ 'program' ]]
   }).
     then(result => {
       Program.count({ where: whereClause }).then(total => {
