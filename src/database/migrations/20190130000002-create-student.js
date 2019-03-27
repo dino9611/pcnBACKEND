@@ -13,11 +13,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         onDelete: 'cascade'
       },
-      code: {
-        allowNull: false,
-        type: Sequelize.STRING,
-        unique: true
-      },
       slug: {
         allowNull: false,
         type: Sequelize.STRING,

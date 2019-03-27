@@ -27,7 +27,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
   Program.findAll({
     where: whereClause,
-    attributes: [ 'id', 'program', 'programCode' ],
+    attributes: [ 'id', 'program' ],
     offset,
     limit,
     order: [[ 'program' ]]
@@ -49,7 +49,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
 router.get('/:id', publicAuth, (req, res) => {
   Program.findByPk(req.params.id, {
-    attributes: [ 'id', 'program', 'programCode' ]
+    attributes: [ 'id', 'program' ]
   }).
     then(result => {
       res.json({
@@ -65,16 +65,10 @@ router.get('/:id', publicAuth, (req, res) => {
 
 router.post('/', jwtAuth, checkBody([{ field: 'program' }]), (req, res) => {
   try {
-    const { program, programCode } = req.body;
-    let pCode = programCode;
-
-    if (!programCode) {
-      pCode = `PC${Date.now()}`;
-    }
+    const { program } = req.body;
 
     Program.create({
-      program,
-      programCode: pCode
+      program
     }).
       then(result => {
         return res.json({
@@ -102,12 +96,11 @@ router.put('/:id', jwtAuth, (req, res) => {
           message: 'Data not found !'
         });
       }
-      const { program, programCode } = req.body;
+      const { program } = req.body;
 
       obj.
         update({
-          program: program || obj.program,
-          programCode: programCode || obj.programCode
+          program: program || obj.program
         }).
         then(() =>
           res.json({

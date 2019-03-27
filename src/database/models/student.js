@@ -4,11 +4,6 @@ module.exports = (sequelize, DataTypes) => {
   const Student = sequelize.define(
     'Student',
     {
-      code: {
-        allowNull: false,
-        type: DataTypes.STRING,
-        unique: true
-      },
       slug: {
         allowNull: false,
         type: DataTypes.STRING,

@@ -13,20 +13,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         onDelete: 'cascade'
       },
-
-      headline: {
-        type: Sequelize.STRING(255)
-      },
       summary: {
         type: Sequelize.STRING(1000)
       },
       jobPreferences: {
-        type: Sequelize.STRING
-      },
-      baseSalary: {
-        type: Sequelize.DECIMAL
-      },
-      profileVideo: {
         type: Sequelize.STRING
       },
       createdAt: {

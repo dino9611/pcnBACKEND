@@ -163,11 +163,8 @@ router.get('/:id', publicAuth, (req, res) => {
   StudentResume.findByPk(req.params.id, {
     attributes: [
       'id',
-      'headline',
       'summary',
-      'jobPreferences',
-      'baseSalary',
-      'profileVideo'
+      'jobPreferences'
     ],
     include: [
       {
@@ -210,29 +207,21 @@ router.post(
   jwtAuth,
   checkBody([
     { field: 'studentId' },
-    { field: 'headline' },
     { field: 'summary' },
-    { field: 'jobPreferences' },
-    { field: 'baseSalary' }
+    { field: 'jobPreferences' }
   ]),
   (req, res) => {
     try {
       const {
         studentId,
-        headline,
         summary,
-        jobPreferences,
-        baseSalary,
-        profileVideo
+        jobPreferences
       } = req.body;
 
       StudentResume.create({
         id: studentId,
-        headline,
         summary,
-        jobPreferences,
-        baseSalary,
-        profileVideo
+        jobPreferences
       }).
         then(result => {
           return res.json({
@@ -262,20 +251,14 @@ router.put('/:id', jwtAuth, (req, res) => {
         });
       }
       const {
-        headline,
         summary,
-        jobPreferences,
-        baseSalary,
-        profileVideo
+        jobPreferences
       } = req.body;
 
       obj.
         update({
-          headline: headline || obj.headline,
           summary: summary || obj.summary,
-          jobPreferences: jobPreferences || obj.jobPreferences,
-          baseSalary: baseSalary || obj.baseSalary,
-          profileVideo: profileVideo || obj.profileVideo
+          jobPreferences: jobPreferences || obj.jobPreferences
         }).
         then(() =>
           res.json({

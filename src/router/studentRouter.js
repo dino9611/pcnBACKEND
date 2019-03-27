@@ -25,7 +25,7 @@ const Op = sequelize.Op;
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { limit, offset, name, code, slug, available } = req.query;
+  const { limit, offset, name, slug, available } = req.query;
   let whereClause = {};
   const orClause = [];
 
@@ -46,22 +46,6 @@ router.get('/', pagingParams, (req, res) => {
     //   [Op.or]: [
     //     {
     //       name: { [Op.like]: `%${name}%` }
-    //     }
-    //   ]
-    // });
-  }
-
-  if (code) {
-    orClause.push(
-      {
-        code: { [Op.like]: `%${code}%` }
-      }
-    );
-
-    // whereClause = Object.assign(whereClause, {
-    //   [Op.or]: [
-    //     {
-    //       code: { [Op.like]: `%${code}%` }
     //     }
     //   ]
     // });
@@ -122,7 +106,6 @@ router.get('/:id', (req, res) => {
     attributes: [
       'id',
       'slug',
-      'code',
       'name',
       'phoneNumber',
       'province',
@@ -168,7 +151,6 @@ router.post('/', (req, res) => {
       const {
         email,
         ep,
-        code,
         name,
         phoneNumber,
         province,
@@ -185,7 +167,6 @@ router.post('/', (req, res) => {
       // form validation
       const validationResult = validate(
         [
-          { field: 'code' },
           { field: 'email', validationType: validationType.isEmail },
           { field: 'ep' },
           { field: 'name' }
@@ -226,7 +207,6 @@ router.post('/', (req, res) => {
                   {
                     id: result.id,
                     slug,
-                    code,
                     name,
                     phoneNumber: phoneNumber || '',
                     province,
@@ -296,7 +276,6 @@ router.put('/:id', (req, res) => {
       const {
         email,
         ep,
-        code,
         name,
         phoneNumber,
         province,
@@ -340,7 +319,6 @@ router.put('/:id', (req, res) => {
                 return obj.
                   update(
                     {
-                      code: code || obj.code,
                       name: name || obj.name,
                       phoneNumber: phoneNumber || obj.phoneNumber,
                       province: province || obj.province,

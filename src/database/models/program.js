@@ -4,11 +4,6 @@ module.exports = (sequelize, DataTypes) => {
   const Program = sequelize.define(
     'Program',
     {
-      programCode: {
-        allowNull: false,
-        type: DataTypes.STRING,
-        unique: true
-      },
       program: {
         type: DataTypes.STRING,
         allowNull: false,

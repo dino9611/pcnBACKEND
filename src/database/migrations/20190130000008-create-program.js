@@ -9,11 +9,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      programCode: {
-        allowNull: false,
-        type: Sequelize.STRING,
-        unique: true
-      },
       program: {
         type: Sequelize.STRING,
         allowNull: false,
