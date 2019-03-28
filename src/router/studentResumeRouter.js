@@ -171,7 +171,9 @@ router.get('/:id', publicAuth, (req, res) => {
         model: Student,
         as: 'student',
         attributes: [
+          'id',
           'name',
+          'slug',
           'phoneNumber',
           'province',
           'city',
