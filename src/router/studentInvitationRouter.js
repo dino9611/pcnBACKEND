@@ -72,6 +72,7 @@ router.get('/', pagingParams, (req, res) => {
         model: HiringPartner,
         as: 'hiringPartner',
         attributes: [
+          'slug',
           'name',
           'phoneNumber',
           'province',
@@ -147,7 +148,7 @@ router.post(
         location,
         message,
         interviewRejectedReason,
-        interviewRejectedBy,
+        updatedBy,
         rejectedReason
       } = req.body;
 
@@ -159,7 +160,7 @@ router.post(
         location,
         message: message || '',
         interviewRejectedReason: interviewRejectedReason || '',
-        interviewRejectedBy: interviewRejectedBy || '',
+        updatedBy: updatedBy || '',
         rejectedReason: rejectedReason || ''
       }).
         then(result => {
@@ -196,7 +197,7 @@ router.put('/:id', (req, res) => {
         location,
         message,
         interviewRejectedReason,
-        interviewRejectedBy,
+        updatedBy,
         rejectedReason
       } = req.body;
 
@@ -209,7 +210,7 @@ router.put('/:id', (req, res) => {
           message: message || obj.message,
           interviewRejectedReason:
             interviewRejectedReason || obj.interviewRejectedReason,
-          interviewRejectedBy: interviewRejectedBy || obj.interviewRejectedBy,
+          updatedBy: updatedBy || obj.updatedBy,
           rejectedReason: rejectedReason || obj.rejectedReason
         }).
         then(() =>

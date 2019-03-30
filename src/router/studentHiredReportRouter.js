@@ -1,12 +1,13 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
-import { StudentHiredReport } from '../database/models';
+import sequelize from '../database/sequelize';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
   responseStatus
 } from '../helper';
+import { StudentHiredReport, StudentInvitation } from '../database/models';
 
 const router = express.Router();
 
@@ -53,13 +54,15 @@ router.get('/:id', (req, res) => {
 router.post(
   '/',
   checkBody([
+    { field: 'id' },
     { field: 'studentId' },
-    { field: 'hiringPartnertId' },
+    { field: 'hiringPartnerId' },
     { field: 'startDate' }
   ]),
   (req, res) => {
     try {
       const {
+        id,
         studentId,
         hiringPartnerId,
         jobTitle,
@@ -68,14 +71,28 @@ router.post(
         salary
       } = req.body;
 
-      StudentHiredReport.create({
-        studentId,
-        hiringPartnerId,
-        jobTitle: jobTitle || '',
-        location: location || '',
-        startDate: startDate || '',
-        salary: salary || 0
-      }).
+      sequelize.
+        transaction(tr => {
+          return StudentHiredReport.create({
+            id,
+            studentId,
+            hiringPartnerId,
+            jobTitle: jobTitle || '',
+            location: location || '',
+            startDate: startDate || '',
+            salary: salary || 0
+          }, { transaction: tr }).then(result => {
+            return StudentInvitation.update({
+              status: 'hired',
+              updatedBy: 'hiring-partner'
+            }, {
+              where: { id },
+              transaction: tr
+            }).then(() => {
+              return result;
+            });
+          });
+        }).
         then(result => {
           return res.json({
             status: responseStatus.SUCCESS,
@@ -103,12 +120,7 @@ router.put('/:id', (req, res) => {
           message: 'Data not found !'
         });
       }
-      const {
-        jobTitle,
-        location,
-        startDate,
-        salary
-      } = req.body;
+      const { jobTitle, location, startDate, salary } = req.body;
 
       obj.
         update({

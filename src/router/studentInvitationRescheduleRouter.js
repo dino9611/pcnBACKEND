@@ -203,11 +203,12 @@ router.put('/:id', (req, res) => {
                   { status: 'interview_accepted' },
                   { where: { id: obj.studentInvitationId }, transaction: tr }
                 );
-              } else if (status === 'rejected' && proposedBy === 'student') {
+              } else if (status === 'rejected') {
                 return StudentInvitation.update(
                   {
                     status: 'interview_rejected',
-                    interviewRejectedReason: interviewRejectedReason || ''
+                    interviewRejectedReason: interviewRejectedReason || '',
+                    updatedBy: proposedBy
                   },
                   { where: { id: obj.studentInvitationId }, transaction: tr }
                 );

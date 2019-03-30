@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       interviewRejectedReason: {
         type: DataTypes.STRING(1000)
       },
-      interviewRejectedBy: {
+      updatedBy: {
         type: DataTypes.STRING
       },
       rejectedReason: {
