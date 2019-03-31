@@ -23,13 +23,21 @@ module.exports = (sequelize, DataTypes) => {
       salary: {
         type: DataTypes.DECIMAL,
         defaultValue: 0
+      },
+      resigned: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       }
     },
     {}
   );
 
-  StudentHiredReport.associate = function () {
+  StudentHiredReport.associate = function (models) {
     // associations can be defined here
+    StudentHiredReport.belongsTo(models.Student, {
+      foreignKey: 'studentId',
+      as: 'student'
+    });
   };
 
   return StudentHiredReport;

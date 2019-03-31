@@ -24,8 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  StudentResignedReport.associate = function () {
+  StudentResignedReport.associate = function (models) {
     // associations can be defined here
+    StudentResignedReport.belongsTo(models.Student, {
+      foreignKey: 'studentId',
+      as: 'student'
+    });
   };
 
   return StudentResignedReport;

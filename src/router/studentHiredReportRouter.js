@@ -7,18 +7,48 @@ import {
   pagingParams,
   responseStatus
 } from '../helper';
-import { StudentHiredReport, StudentInvitation } from '../database/models';
+import { Student, StudentHiredReport, StudentInvitation, User } from '../database/models';
 
 const router = express.Router();
 
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit } = req.query;
-  const whereClause = {};
+  const { offset, limit, resigned } = req.query;
+  let whereClause = {};
+
+  if (resigned !== 'undefined') {
+    const status = resigned === 'true';
+
+    whereClause = { ...whereClause, resigned: status };
+  }
 
   StudentHiredReport.findAll({
     where: whereClause,
+    include: [
+      {
+        model: Student,
+        as: 'student',
+        attributes: [
+          'slug',
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'birthDate',
+          'gender',
+          'isAvailable'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
+      }
+    ],
     offset,
     limit
   }).

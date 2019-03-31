@@ -43,6 +43,10 @@ module.exports = {
         type: Sequelize.DECIMAL,
         defaultValue: 0
       },
+      resigned: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

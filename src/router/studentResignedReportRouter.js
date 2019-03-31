@@ -1,14 +1,19 @@
-import { checkBody } from '../lib/validator';
+import config from '../config.json';
 import express from 'express';
-import { StudentResignedReport } from '../database/models';
+import fs from 'fs';
+import { validate } from '../lib/validator/core';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
-  responseStatus
+  responseStatus,
+  uploader
 } from '../helper';
+import { Student, StudentHiredReport, StudentResignedReport, User } from '../database/models';
 
 const router = express.Router();
+const hostName = config.HOSTNAME;
+const path = '/files/student/resigned';
 
 router.use(jwtAuth);
 
@@ -18,6 +23,30 @@ router.get('/', pagingParams, (req, res) => {
 
   StudentResignedReport.findAll({
     where: whereClause,
+    include: [
+      {
+        model: Student,
+        as: 'student',
+        attributes: [
+          'slug',
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'birthDate',
+          'gender',
+          'isAvailable'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
+      }
+    ],
     offset,
     limit
   }).
@@ -52,38 +81,100 @@ router.get('/:id', (req, res) => {
 
 router.post(
   '/',
-  checkBody([
-    { field: 'studentId' },
-    { field: 'hiringPartnerId' },
-    { field: 'resignationDate' }
-  ]),
   (req, res) => {
-    try {
-      const {
-        studentId,
-        hiringPartnerId,
-        reason,
-        resignationDate
-      } = req.body;
+    const upload = uploader(path, 'SR', {
+      profilePicture: 'pdf|doc|docx'
+    }).fields([{ name: 'suratResign' }]);
 
-      StudentResignedReport.create({
-        studentId,
-        hiringPartnerId,
-        reason: reason || '',
-        resignationDate
-      }).
-        then(result => {
-          return res.json({
-            status: responseStatus.SUCCESS,
-            message: 'Data Saved !',
-            result: {
-              id: result.id
-            }
+    try {
+      upload(req, res, err => {
+        // check upload image process
+        if (err) {
+          return errorResponse(err.message, res, err.message);
+        }
+
+        const { suratResign } = req.files;
+        const {
+          id,
+          studentId,
+          hiringPartnerId,
+          reason,
+          resignationDate
+        } = req.body;
+        const suratResignPath = suratResign ?
+          `${path}/${suratResign[0].filename}` :
+          null;
+
+        // form validation
+        const validationResult = validate(
+          [
+            { field: 'id' },
+            { field: 'hiringPartnerId' },
+            { field: 'studentId' }
+          ],
+          req.body
+        );
+
+        if (validationResult.length > 0) {
+          if (suratResignPath) {
+            fs.unlinkSync(`./src/public${suratResignPath}`);
+          }
+
+          return res.status(422).json({
+            status: responseStatus.NOT_VALID,
+            message: 'Requested data is not valid',
+            result: validationResult
           });
-        }).
-        catch(error => {
+        }
+
+        try {
+          StudentResignedReport.create({
+            id,
+            studentId,
+            hiringPartnerId,
+            reason: reason || '',
+            resignationDate,
+            suratResign: suratResign ?
+              `${hostName}${suratResignPath}` :
+              null
+          }).
+            then(result => {
+              StudentHiredReport.update({
+                resigned: true
+              }, {
+                where: { id }
+              }).then(() => {
+                return res.json({
+                  status: responseStatus.SUCCESS,
+                  message: 'Data Saved !',
+                  result: {
+                    id: result.id
+                  }
+                });
+              }).
+                catch(error => {
+                  if (suratResignPath) {
+                    fs.unlinkSync(`./src/public${suratResignPath}`);
+                  }
+
+                  return errorResponse(error, res);
+                });
+            }).
+            catch(error => {
+              if (suratResignPath) {
+                fs.unlinkSync(`./src/public${suratResignPath}`);
+              }
+
+              return errorResponse(error, res);
+            });
+        } catch (error) {
+          if (suratResignPath) {
+            fs.unlinkSync(`./src/public${suratResignPath}`);
+          }
+
           return errorResponse(error, res);
-        });
+        }
+      });
     } catch (error) {
       return errorResponse(error, res);
     }
