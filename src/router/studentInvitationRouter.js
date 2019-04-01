@@ -96,11 +96,11 @@ router.get('/', pagingParams, (req, res) => {
       {
         model: StudentInvitationReschedule,
         as: 'studentInvitationReschedule',
-        order: [[ 'updatedAt', 'DESC' ]],
+        order: [[ 'createdAt', 'DESC' ]],
         limit: 1
       }
     ],
-    order: [[ 'scheduleDate' ]]
+    order: [[ 'updatedAt', 'DESC' ]]
   }).
     then(result => {
       StudentInvitation.count({ where: whereClause }).then(total => {

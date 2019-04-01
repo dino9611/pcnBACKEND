@@ -44,7 +44,8 @@ router.get('/', pagingParams, (req, res) => {
             as: 'user',
             attributes: [ 'email', 'profilePicture', 'type' ]
           }
-        ]
+        ],
+        order: [[ 'updatedAt', 'DESC' ]]
       }
     ],
     offset,

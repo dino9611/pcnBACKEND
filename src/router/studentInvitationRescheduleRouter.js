@@ -98,7 +98,8 @@ router.post(
           ).then(result => {
             return StudentInvitation.update(
               {
-                status: 'rescheduled'
+                status: 'rescheduled',
+                updatedBy: proposedBy
               },
               {
                 where: { id: studentInvitationId },
@@ -200,7 +201,7 @@ router.put('/:id', (req, res) => {
             then(() => {
               if (status === 'accepted') {
                 return StudentInvitation.update(
-                  { status: 'interview_accepted' },
+                  { status: 'interview_accepted', updatedBy: proposedBy },
                   { where: { id: obj.studentInvitationId }, transaction: tr }
                 );
               } else if (status === 'rejected') {

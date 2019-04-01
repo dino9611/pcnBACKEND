@@ -50,7 +50,8 @@ router.get('/', pagingParams, (req, res) => {
       }
     ],
     offset,
-    limit
+    limit,
+    order: [[ 'updatedAt', 'DESC' ]]
   }).
     then(result => {
       StudentHiredReport.count({ where: whereClause }).then(total => {
