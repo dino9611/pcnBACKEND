@@ -32,7 +32,17 @@ router.get('/', pagingParams, (req, res) => {
   };
 
   if (status) {
-    whereClause = { ...whereClause, status };
+    if (Array.isArray(status)) {
+      const statuses = status.map(val => {
+        return {
+          status: val
+        };
+      });
+
+      whereClause = { ...whereClause, [Op.or]: statuses };
+    } else {
+      whereClause = { ...whereClause, status };
+    }
   }
   if (studentId) {
     whereClause = { ...whereClause, studentId };
