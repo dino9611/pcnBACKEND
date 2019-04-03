@@ -7,7 +7,7 @@ import {
   pagingParams,
   responseStatus
 } from '../helper';
-import { Student, StudentHiredReport, StudentInvitation, User } from '../database/models';
+import { HiringPartner, Student, StudentHiredReport, StudentInvitation, User } from '../database/models';
 
 const router = express.Router();
 
@@ -39,6 +39,31 @@ router.get('/', pagingParams, (req, res) => {
           'birthDate',
           'gender',
           'isAvailable'
+        ],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
+      },
+      {
+        model: HiringPartner,
+        as: 'hiringPartner',
+        attributes: [
+          'slug',
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'summary',
+          'teamSize',
+          'profileVideo',
+          'website',
+          'facebook',
+          'linkedin'
         ],
         include: [
           {

@@ -9,7 +9,7 @@ import {
   responseStatus,
   uploader
 } from '../helper';
-import { Student, StudentHiredReport, StudentResignedReport, User } from '../database/models';
+import { HiringPartner, Student, StudentHiredReport, StudentResignedReport, User } from '../database/models';
 
 const router = express.Router();
 const hostName = config.HOSTNAME;
@@ -44,12 +44,37 @@ router.get('/', pagingParams, (req, res) => {
             as: 'user',
             attributes: [ 'email', 'profilePicture', 'type' ]
           }
+        ]
+      },
+      {
+        model: HiringPartner,
+        as: 'hiringPartner',
+        attributes: [
+          'slug',
+          'name',
+          'phoneNumber',
+          'province',
+          'city',
+          'address',
+          'summary',
+          'teamSize',
+          'profileVideo',
+          'website',
+          'facebook',
+          'linkedin'
         ],
-        order: [[ 'updatedAt', 'DESC' ]]
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: [ 'email', 'profilePicture', 'type' ]
+          }
+        ]
       }
     ],
     offset,
-    limit
+    limit,
+    order: [[ 'updatedAt', 'DESC' ]]
   }).
     then(result => {
       StudentResignedReport.count({ where: whereClause }).then(total => {

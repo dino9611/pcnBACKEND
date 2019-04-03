@@ -30,6 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'studentId',
       as: 'student'
     });
+    StudentResignedReport.belongsTo(models.HiringPartner, {
+      foreignKey: 'hiringPartnerId',
+      as: 'hiringPartner'
+    });
   };
 
   return StudentResignedReport;
