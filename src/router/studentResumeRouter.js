@@ -2,17 +2,12 @@ import { checkBody } from '../lib/validator';
 import express from 'express';
 import sequelize from '../database/sequelize';
 import {
-  errorResponse,
-  jwtAuth,
-  pagingParams,
-  publicAuth,
-  responseStatus
-} from '../helper';
-import {
+  Certification,
   JobRole,
   Program,
   Skill,
   Student,
+  StudentCertification,
   StudentEducation,
   StudentJobInterest,
   StudentProgram,
@@ -21,6 +16,13 @@ import {
   StudentWorkExperience,
   User
 } from '../database/models';
+import {
+  errorResponse,
+  jwtAuth,
+  pagingParams,
+  publicAuth,
+  responseStatus
+} from '../helper';
 
 const router = express.Router();
 const Op = sequelize.Op;
@@ -134,6 +136,14 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
           { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
         ],
         where: jiFilter
+      },
+      {
+        model: StudentCertification,
+        as: 'studentCertification',
+        attributes: [ 'id' ],
+        include: [
+          { model: Certification, as: 'certification', attributes: [ 'id', 'certification' ]}
+        ]
       }
     ],
     order: [

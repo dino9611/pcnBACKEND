@@ -5,14 +5,17 @@ import express from 'express';
 import logger from './log/logger';
 import {
   AdminRouter,
+  CertificationRouter,
   CityRouter,
   HiringPartnerRegistrationRouter,
   HiringPartnerRouter,
+  HPRegistrationFormRouter,
   JobRoleRouter,
   LoginRouter,
   ProgramRouter,
   ProvinceRouter,
   SkillRouter,
+  StudentCertificationRouter,
   StudentEducationRouter,
   StudentHiredReportRouter,
   StudentInvitationRescheduleRouter,
@@ -23,6 +26,7 @@ import {
   StudentResumeRouter,
   StudentRouter,
   StudentSkillRouter,
+
   StudentWorkExperienceRouter,
   SuccessStoryRouter,
   ValidateTokenRouter
@@ -56,14 +60,17 @@ app.get('/', (req, res) => {
 
 // list of router
 app.use('/admins', AdminRouter);
+app.use('/certifications', CertificationRouter);
 app.use('/cities', CityRouter);
 app.use('/hp-registrations', HiringPartnerRegistrationRouter);
 app.use('/hiring-partners', HiringPartnerRouter);
+app.use('/hp-registration-forms', HPRegistrationFormRouter);
 app.use('/job-roles', JobRoleRouter);
 app.use('/logins', LoginRouter);
 app.use('/programs', ProgramRouter);
 app.use('/provinces', ProvinceRouter);
 app.use('/skills', SkillRouter);
+app.use('/student-certifications', StudentCertificationRouter);
 app.use('/student-educations', StudentEducationRouter);
 app.use('/student-hired-reports', StudentHiredReportRouter);
 app.use('/student-invitation-reschedules', StudentInvitationRescheduleRouter);
