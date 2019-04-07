@@ -16,28 +16,46 @@ const Op = sequelize.Op;
 // router.use(publicAuth);
 
 router.get('/', jwtAuth, pagingParams, (req, res) => {
-  const { offset, limit, name, email, companyName } = req.query;
+  const { offset, limit, name, email, companyName, processed } = req.query;
   let whereClause = {};
+  const orClause = [];
 
   if (name) {
-    whereClause = Object.assign(whereClause, {
-      name: { [Op.like]: `%${name}%` }
-    });
+    orClause.push(
+      {
+        name: { [Op.like]: `%${name}%` }
+      }
+    );
   }
   if (email) {
-    whereClause = Object.assign(whereClause, {
-      email: { [Op.like]: `%${email}%` }
-    });
+    orClause.push(
+      {
+        email: { [Op.like]: `%${email}%` }
+      }
+    );
   }
   if (companyName) {
-    whereClause = Object.assign(whereClause, {
-      companyName: { [Op.like]: `%${companyName}%` }
-    });
+    orClause.push(
+      {
+        companyName: { [Op.like]: `%${companyName}%` }
+      }
+    );
+  }
+  if (processed !== undefined) {
+    whereClause = { ...whereClause, processed };
+  }
+
+  if (orClause.length > 0) {
+    whereClause = { ...whereClause,
+      ...{
+        [Op.or]: orClause
+      }};
   }
 
   HiringPartnerRegistration.findAll({
     where: whereClause,
     attributes: [
+      'id',
       'name',
       'email',
       'phoneNumber',
@@ -45,10 +63,13 @@ router.get('/', jwtAuth, pagingParams, (req, res) => {
       'companyWebsite',
       'companyJobPosition',
       'jobPositionAndRequirement',
-      'supportingValue'
+      'supportingValue',
+      'processed',
+      'createdAt'
     ],
     offset,
-    limit
+    limit,
+    order: [[ 'createdAt', 'DESC' ]]
   }).
     then(result => {
       result.forEach(hpr => {
@@ -171,7 +192,8 @@ router.put('/:id', jwtAuth, (req, res) => {
         companyWebsite,
         companyJobPosition,
         jobPositionAndRequirement,
-        supportingValue
+        supportingValue,
+        processed
       } = req.body;
 
       obj.
@@ -187,7 +209,8 @@ router.put('/:id', jwtAuth, (req, res) => {
             obj.jobPositionAndRequirement,
           supportingValue: supportingValue ?
             JSON.stringify(supportingValue) :
-            obj.supportingValue
+            obj.supportingValue,
+          processed: processed !== undefined ? processed : obj.processed
         }).
         then(() =>
           res.json({
