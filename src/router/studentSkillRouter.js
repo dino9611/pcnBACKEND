@@ -1,5 +1,6 @@
 import { checkBody } from '../lib/validator';
 import express from 'express';
+import sequelize from '../database/sequelize';
 import {
   errorResponse,
   jwtAuth,
@@ -92,39 +93,88 @@ router.post(
 );
 
 router.put('/:id', (req, res) => {
-  StudentSkill.findByPk(req.params.id).
-    then(obj => {
-      if (!obj) {
-        return res.json({
-          status: responseStatus.NOT_FOUND,
-          message: 'Data not found !'
-        });
-      }
-      const {
-        skillId,
-        position
-      } = req.body;
+  if (req.params.id === 'bulk') {
+    const data = req.body;
 
-      obj.
-        update({
-          skillId: skillId || obj.skillId,
-          position: position || obj.position
-        }).
-        then(() =>
-          res.json({
-            status: responseStatus.SUCCESS,
-            message: 'Data updated !',
-            result: {
-              id: obj.id
+    if (Array.isArray(data)) {
+      sequelize.
+        transaction(tr => {
+          const processList = [];
+
+          for (const dt of data) {
+            let updatedData = {};
+
+            if (dt.skillId) {
+              updatedData = {
+                updatedData,
+                ...{ skillId: dt.skillId }
+              };
             }
-          })).
+            if (dt.position !== 'undefined' || dt.position !== undefined) {
+              updatedData = {
+                updatedData,
+                ...{ position: dt.position }
+              };
+            }
+
+            processList.push(
+              StudentSkill.update(updatedData, {
+                where: { id: dt.id },
+                transaction: tr
+              })
+            );
+          }
+
+          return Promise.all(processList);
+        }).
+        then(() => {
+          return res.json({
+            message: 'Data Saved !',
+            result: {
+              status: responseStatus.SUCCESS,
+              message: 'Data updated !'
+            }
+          });
+        }).
         catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
-      return errorResponse(error, res);
-    });
+    }
+  } else {
+    StudentSkill.findByPk(req.params.id).
+      then(obj => {
+        if (!obj) {
+          return res.json({
+            status: responseStatus.NOT_FOUND,
+            message: 'Data not found !'
+          });
+        }
+        const {
+          skillId,
+          position
+        } = req.body;
+
+        obj.
+          update({
+            skillId: skillId || obj.skillId,
+            position: position || obj.position
+          }).
+          then(() =>
+            res.json({
+              status: responseStatus.SUCCESS,
+              message: 'Data updated !',
+              result: {
+                id: obj.id
+              }
+            })).
+          catch(error => {
+            return errorResponse(error, res);
+          });
+      }).
+      catch(error => {
+        return errorResponse(error, res);
+      });
+  }
 });
 
 router.delete('/:id', (req, res) => {

@@ -114,7 +114,7 @@ router.put('/:id', (req, res) => {
                 ...{ experience: dt.experience }
               };
             }
-            if (dt.highlight !== 'undefined') {
+            if (dt.highlight !== 'undefined' || dt.highlight !== undefined) {
               updatedData = {
                 updatedData,
                 ...{ highlight: dt.highlight }
