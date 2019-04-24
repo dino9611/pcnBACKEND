@@ -145,7 +145,14 @@ router.post(
               where: { id },
               transaction: tr
             }).then(() => {
-              return result;
+              return Student.update({
+                isAvailable: false
+              }, {
+                where: { id: studentId },
+                transaction: tr
+              }).then(() => {
+                return result;
+              });
             });
           });
         }).

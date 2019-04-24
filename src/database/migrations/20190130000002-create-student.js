@@ -42,9 +42,10 @@ module.exports = {
       gender: {
         type: Sequelize.STRING(1)
       },
-
       isAvailable: {
-        type: Sequelize.BOOLEAN
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
       },
       createdAt: {
         allowNull: false,

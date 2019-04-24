@@ -1,6 +1,7 @@
 import config from '../config.json';
 import express from 'express';
 import fs from 'fs';
+import sequelize from '../database/sequelize';
 import { validate } from '../lib/validator/core';
 import {
   errorResponse,
@@ -9,7 +10,13 @@ import {
   responseStatus,
   uploader
 } from '../helper';
-import { HiringPartner, Student, StudentHiredReport, StudentResignedReport, User } from '../database/models';
+import {
+  HiringPartner,
+  Student,
+  StudentHiredReport,
+  StudentResignedReport,
+  User
+} from '../database/models';
 
 const router = express.Router();
 const hostName = config.HOSTNAME;
@@ -105,107 +112,111 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.post(
-  '/',
-  (req, res) => {
-    const upload = uploader(path, 'SR', {
-      profilePicture: 'pdf|doc|docx'
-    }).fields([{ name: 'suratResign' }]);
+router.post('/', (req, res) => {
+  const upload = uploader(path, 'SR', {
+    profilePicture: 'pdf|doc|docx'
+  }).fields([{ name: 'suratResign' }]);
 
-    try {
-      upload(req, res, err => {
-        // check upload image process
-        if (err) {
-          return errorResponse(err.message, res, err.message);
+  try {
+    upload(req, res, err => {
+      // check upload image process
+      if (err) {
+        return errorResponse(err.message, res, err.message);
+      }
+
+      const { suratResign } = req.files;
+      const {
+        id,
+        studentId,
+        hiringPartnerId,
+        reason,
+        resignationDate
+      } = req.body;
+      const suratResignPath = suratResign ?
+        `${path}/${suratResign[0].filename}` :
+        null;
+
+      // form validation
+      const validationResult = validate(
+        [{ field: 'id' }, { field: 'hiringPartnerId' }, { field: 'studentId' }],
+        req.body
+      );
+
+      if (validationResult.length > 0) {
+        if (suratResignPath) {
+          fs.unlinkSync(`./src/public${suratResignPath}`);
         }
 
-        const { suratResign } = req.files;
-        const {
-          id,
-          studentId,
-          hiringPartnerId,
-          reason,
-          resignationDate
-        } = req.body;
-        const suratResignPath = suratResign ?
-          `${path}/${suratResign[0].filename}` :
-          null;
+        return res.status(422).json({
+          status: responseStatus.NOT_VALID,
+          message: 'Requested data is not valid',
+          result: validationResult
+        });
+      }
 
-        // form validation
-        const validationResult = validate(
-          [
-            { field: 'id' },
-            { field: 'hiringPartnerId' },
-            { field: 'studentId' }
-          ],
-          req.body
-        );
-
-        if (validationResult.length > 0) {
-          if (suratResignPath) {
-            fs.unlinkSync(`./src/public${suratResignPath}`);
-          }
-
-          return res.status(422).json({
-            status: responseStatus.NOT_VALID,
-            message: 'Requested data is not valid',
-            result: validationResult
-          });
-        }
-
-        try {
-          StudentResignedReport.create({
-            id,
-            studentId,
-            hiringPartnerId,
-            reason: reason || '',
-            resignationDate,
-            suratResign: suratResign ?
-              `${hostName}${suratResignPath}` :
-              null
-          }).
-            then(result => {
-              StudentHiredReport.update({
-                resigned: true
-              }, {
-                where: { id }
-              }).then(() => {
-                return res.json({
-                  status: responseStatus.SUCCESS,
-                  message: 'Data Saved !',
-                  result: {
-                    id: result.id
-                  }
+      try {
+        sequelize.
+          transaction(tr => {
+            return StudentResignedReport.create(
+              {
+                id,
+                studentId,
+                hiringPartnerId,
+                reason: reason || '',
+                resignationDate,
+                suratResign: suratResign ?
+                  `${hostName}${suratResignPath}` :
+                  null
+              },
+              { transaction: tr }
+            ).then(result => {
+              return StudentHiredReport.update(
+                {
+                  resigned: true
+                },
+                {
+                  where: { id },
+                  transaction: tr
+                }
+              ).then(() => {
+                return Student.update({
+                  isAvailable: true
+                }, {
+                  where: { id: studentId },
+                  transaction: tr
+                }).then(() => {
+                  return result;
                 });
-              }).
-                catch(error => {
-                  if (suratResignPath) {
-                    fs.unlinkSync(`./src/public${suratResignPath}`);
-                  }
-
-                  return errorResponse(error, res);
-                });
-            }).
-            catch(error => {
-              if (suratResignPath) {
-                fs.unlinkSync(`./src/public${suratResignPath}`);
-              }
-
-              return errorResponse(error, res);
+              });
             });
-        } catch (error) {
-          if (suratResignPath) {
-            fs.unlinkSync(`./src/public${suratResignPath}`);
-          }
+          }).then(result => {
+            return res.json({
+              status: responseStatus.SUCCESS,
+              message: 'Data Saved !',
+              result: {
+                id: result.id
+              }
+            });
+          }).
+          catch(error => {
+            if (suratResignPath) {
+              fs.unlinkSync(`./src/public${suratResignPath}`);
+            }
 
-          return errorResponse(error, res);
+            return errorResponse(error, res);
+          });
+      } catch (error) {
+        if (suratResignPath) {
+          fs.unlinkSync(`./src/public${suratResignPath}`);
         }
-      });
-    } catch (error) {
-      return errorResponse(error, res);
-    }
+
+        return errorResponse(error, res);
+      }
+    });
+  } catch (error) {
+    return errorResponse(error, res);
   }
-);
+});
 
 router.put('/:id', (req, res) => {
   StudentResignedReport.findByPk(req.params.id).
@@ -216,10 +227,7 @@ router.put('/:id', (req, res) => {
           message: 'Data not found !'
         });
       }
-      const {
-        reason,
-        resignationDate
-      } = req.body;
+      const { reason, resignationDate } = req.body;
 
       obj.
         update({
