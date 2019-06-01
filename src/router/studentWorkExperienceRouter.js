@@ -13,8 +13,14 @@ const router = express.Router();
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit } = req.query;
-  const whereClause = {};
+  const { offset, limit, studentResumeId } = req.query;
+  let whereClause = {};
+
+  if (studentResumeId) {
+    whereClause = Object.assign(whereClause, {
+      studentResumeId
+    });
+  }
 
   StudentWorkExperience.findAll({
     where: whereClause,

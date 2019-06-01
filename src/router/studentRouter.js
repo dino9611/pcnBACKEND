@@ -73,7 +73,8 @@ router.get('/', pagingParams, (req, res) => {
         as: 'user',
         attributes: [ 'email', 'profilePicture', 'type' ]
       }
-    ]
+    ],
+    order: [[ 'createdAt', 'DESC' ]]
   }).
     then(result => {
       if (!result) {
