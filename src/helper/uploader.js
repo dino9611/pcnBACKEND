@@ -52,6 +52,7 @@ export const uploader = (destination, fileNamePrefix, extensions = null) => {
 
   return multer({
     storage,
-    fileFilter: imageFilter
+    fileFilter: imageFilter,
+    limits: { fieldSize: 10 * 1024 * 1024 }
   });
 };

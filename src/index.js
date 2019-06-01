@@ -5,6 +5,7 @@ import express from 'express';
 import logger from './log/logger';
 import {
   AdminRouter,
+  CertificationRegistrationRouter,
   CertificationRouter,
   CityRouter,
   HiringPartnerRegistrationRouter,
@@ -61,6 +62,7 @@ app.get('/', (req, res) => {
 // list of router
 app.use('/admins', AdminRouter);
 app.use('/certifications', CertificationRouter);
+app.use('/certification-registrations', CertificationRegistrationRouter);
 app.use('/cities', CityRouter);
 app.use('/hp-registrations', HiringPartnerRegistrationRouter);
 app.use('/hiring-partners', HiringPartnerRouter);

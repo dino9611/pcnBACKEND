@@ -1,4 +1,5 @@
 export * from './adminRouter';
+export * from './certificationRegistrationRouter';
 export * from './certificationRouter';
 export * from './cityRouter';
 export * from './hiringPartnerRegistrationRouter';
