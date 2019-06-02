@@ -36,11 +36,9 @@ router.get('/', pagingParams, (req, res) => {
   }
 
   if (name) {
-    orClause.push(
-      {
-        name: { [Op.like]: `%${name}%` }
-      }
-    );
+    orClause.push({
+      name: { [Op.like]: `%${name}%` }
+    });
 
     // whereClause = Object.assign(whereClause, {
     //   [Op.or]: [
@@ -213,8 +211,8 @@ router.post('/', (req, res) => {
                     province,
                     city,
                     address,
-                    birthDate,
-                    gender,
+                    birthDate: birthDate || new Date(),
+                    gender: gender || 'M',
                     isAvailable
                   },
                   { transaction: tr }
@@ -317,6 +315,9 @@ router.put('/:id', (req, res) => {
 
             sequelize.
               transaction(tr => {
+                console.log(obj);
+                console.log('isAvail :', isAvailable);
+
                 return obj.
                   update(
                     {
@@ -328,7 +329,7 @@ router.put('/:id', (req, res) => {
                       birthDate: birthDate || obj.birthDate,
                       gender: gender || obj.gender,
                       isAvailable:
-                        isAvailable === 'undefined' ?
+                        isAvailable === 'undefined' || isAvailable === undefined ?
                           obj.isAvailable :
                           isAvailable
                     },

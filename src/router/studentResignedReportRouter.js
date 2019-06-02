@@ -68,7 +68,8 @@ router.get('/', pagingParams, (req, res) => {
           'profileVideo',
           'website',
           'facebook',
-          'linkedin'
+          'linkedin',
+          'useHiringFee'
         ],
         include: [
           {

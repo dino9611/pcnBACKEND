@@ -14,13 +14,23 @@ const router = express.Router();
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit, resigned } = req.query;
+  const { offset, limit, resigned, hiringPartnerId, studentId } = req.query;
   let whereClause = {};
 
   if (resigned !== 'undefined') {
     const status = resigned === 'true';
 
     whereClause = { ...whereClause, resigned: status };
+  }
+  if (hiringPartnerId) {
+    whereClause = Object.assign(whereClause, {
+      hiringPartnerId
+    });
+  }
+  if (studentId) {
+    whereClause = Object.assign(whereClause, {
+      studentId
+    });
   }
 
   StudentHiredReport.findAll({
@@ -63,7 +73,8 @@ router.get('/', pagingParams, (req, res) => {
           'profileVideo',
           'website',
           'facebook',
-          'linkedin'
+          'linkedin',
+          'useHiringFee'
         ],
         include: [
           {

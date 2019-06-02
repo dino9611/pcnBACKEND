@@ -28,15 +28,29 @@ const router = express.Router();
 const Op = sequelize.Op;
 
 router.get('/', publicAuth, pagingParams, (req, res) => {
-  const { offset, limit, name, jobRoles, skills, jobPreferences, slug } = req.query;
+  const {
+    offset,
+    limit,
+    name,
+    jobRoles,
+    skills,
+    jobPreferences,
+    slug,
+    onlyAvailable
+  } = req.query;
   let whereClause = {};
+  const required = Boolean(onlyAvailable);
 
   if (name) {
     whereClause = Object.assign(whereClause, {
       name: { [Op.like]: `%${name}%` }
     });
   }
-  if (jobPreferences && Array.isArray(jobPreferences) && jobPreferences.length > 0) {
+  if (
+    jobPreferences &&
+    Array.isArray(jobPreferences) &&
+    jobPreferences.length > 0
+  ) {
     const filter = jobPreferences.map(val => {
       return { jobPreferences: { [Op.like]: `%${val}%` }};
     });
@@ -67,6 +81,9 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
   if (slug) {
     studentFilter = { slug };
   }
+  if (onlyAvailable) {
+    studentFilter = { isAvailable: true };
+  }
 
   StudentResume.findAll({
     where: whereClause,
@@ -76,6 +93,8 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
       {
         model: Student,
         as: 'student',
+
+        // required,
         attributes: [
           'slug',
           'name',
@@ -99,6 +118,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
       {
         model: StudentSkill,
         as: 'studentSkill',
+        required,
         attributes: [ 'id', 'position' ],
         include: [{ model: Skill, as: 'skill', attributes: [ 'id', 'skill' ]}],
         where: skillFilter
@@ -114,11 +134,15 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
       {
         model: StudentWorkExperience,
         as: 'studentWorkExperience',
+
+        // required,
         attributes: [ 'id', 'jobTitle', 'company', 'from', 'to', 'description' ]
       },
       {
         model: StudentEducation,
         as: 'studentEducation',
+
+        // required,
         attributes: [
           'id',
           'institution',
@@ -131,6 +155,8 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
       {
         model: StudentJobInterest,
         as: 'studentJobInterest',
+
+        // required,
         attributes: [ 'id', 'experience', 'highlight' ],
         include: [
           { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
@@ -142,15 +168,27 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         as: 'studentCertification',
         attributes: [ 'id' ],
         include: [
-          { model: Certification, as: 'certification', attributes: [ 'id', 'certification' ]}
+          {
+            model: Certification,
+            as: 'certification',
+            attributes: [ 'id', 'certification' ]
+          }
         ]
       }
     ],
     order: [
       [{ model: StudentSkill, as: 'studentSkill' }, 'position' ],
       [{ model: StudentEducation, as: 'studentEducation' }, 'endDate', 'DESC' ],
-      [{ model: StudentJobInterest, as: 'studentJobInterest' }, 'highlight', 'DESC' ],
-      [{ model: StudentWorkExperience, as: 'studentWorkExperience' }, 'to', 'DESC' ],
+      [
+        { model: StudentJobInterest, as: 'studentJobInterest' },
+        'highlight',
+        'DESC'
+      ],
+      [
+        { model: StudentWorkExperience, as: 'studentWorkExperience' },
+        'to',
+        'DESC'
+      ],
       [{ model: StudentProgram, as: 'studentProgram' }, 'year', 'DESC' ]
     ]
   }).
@@ -171,11 +209,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
 router.get('/:id', publicAuth, (req, res) => {
   StudentResume.findByPk(req.params.id, {
-    attributes: [
-      'id',
-      'summary',
-      'jobPreferences'
-    ],
+    attributes: [ 'id', 'summary', 'jobPreferences' ],
     include: [
       {
         model: Student,
@@ -224,11 +258,7 @@ router.post(
   ]),
   (req, res) => {
     try {
-      const {
-        studentId,
-        summary,
-        jobPreferences
-      } = req.body;
+      const { studentId, summary, jobPreferences } = req.body;
 
       StudentResume.create({
         id: studentId,
@@ -262,10 +292,7 @@ router.put('/:id', jwtAuth, (req, res) => {
           message: 'Data not found !'
         });
       }
-      const {
-        summary,
-        jobPreferences
-      } = req.body;
+      const { summary, jobPreferences } = req.body;
 
       obj.
         update({
