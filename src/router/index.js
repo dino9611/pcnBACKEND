@@ -2,6 +2,7 @@ export * from './adminRouter';
 export * from './certificationRegistrationRouter';
 export * from './certificationRouter';
 export * from './cityRouter';
+export * from './generalSettingRouter';
 export * from './hiringPartnerRegistrationRouter';
 export * from './hiringPartnerRouter';
 export * from './hpRegistrationFormRouter';

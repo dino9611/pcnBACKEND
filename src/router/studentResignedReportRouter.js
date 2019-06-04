@@ -14,6 +14,7 @@ import {
   HiringPartner,
   Student,
   StudentHiredReport,
+  StudentInvitation,
   StudentResignedReport,
   User
 } from '../database/models';
@@ -186,7 +187,14 @@ router.post('/', (req, res) => {
                   where: { id: studentId },
                   transaction: tr
                 }).then(() => {
-                  return result;
+                  return StudentInvitation.update({
+                    status: 'resigned'
+                  }, {
+                    where: { id },
+                    transaction: tr
+                  }).then(() => {
+                    return result;
+                  });
                 });
               });
             });

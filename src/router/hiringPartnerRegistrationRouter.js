@@ -7,7 +7,8 @@ import {
   jwtAuth,
   pagingParams,
   publicAuth,
-  responseStatus
+  responseStatus,
+  sendEmail
 } from '../helper';
 
 const router = express.Router();
@@ -21,35 +22,31 @@ router.get('/', jwtAuth, pagingParams, (req, res) => {
   const orClause = [];
 
   if (name) {
-    orClause.push(
-      {
-        name: { [Op.like]: `%${name}%` }
-      }
-    );
+    orClause.push({
+      name: { [Op.like]: `%${name}%` }
+    });
   }
   if (email) {
-    orClause.push(
-      {
-        email: { [Op.like]: `%${email}%` }
-      }
-    );
+    orClause.push({
+      email: { [Op.like]: `%${email}%` }
+    });
   }
   if (companyName) {
-    orClause.push(
-      {
-        companyName: { [Op.like]: `%${companyName}%` }
-      }
-    );
+    orClause.push({
+      companyName: { [Op.like]: `%${companyName}%` }
+    });
   }
   if (processed !== undefined) {
     whereClause = { ...whereClause, processed };
   }
 
   if (orClause.length > 0) {
-    whereClause = { ...whereClause,
+    whereClause = {
+      ...whereClause,
       ...{
         [Op.or]: orClause
-      }};
+      }
+    };
   }
 
   HiringPartnerRegistration.findAll({
@@ -158,6 +155,19 @@ router.post(
         supportingValue: JSON.stringify(supportingValue)
       }).
         then(result => {
+          sendEmail(
+            '',
+            'Hiring Partner Registration Data',
+            '',
+            `<div>
+              <div><b>Name : </b>${name}</div>
+              <div><b>Email : </b>${email}</div>
+              <div><b>Phone Number : </b>${phoneNumber}</div>
+              <div><b>Company Name : </b>${companyName}</div>
+              <div><b>Company Web : </b>${companyWebsite}</div>
+            </div>`
+          );
+
           return res.json({
             status: responseStatus.SUCCESS,
             message: 'Data Saved !',

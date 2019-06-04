@@ -24,6 +24,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL,
         defaultValue: 0
       },
+      offeringLetter: {
+        type: DataTypes.STRING
+      },
+      processed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
       resigned: {
         type: DataTypes.BOOLEAN,
         defaultValue: false

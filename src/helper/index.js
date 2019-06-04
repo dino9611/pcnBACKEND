@@ -2,6 +2,7 @@ export * from './auth';
 export * from './encryption';
 export * from './slug';
 export * from './uploader';
+export * from './mail';
 import config from '../config.json';
 import logger from '../log/logger';
 

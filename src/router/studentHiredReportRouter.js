@@ -1,20 +1,31 @@
-import { checkBody } from '../lib/validator';
+import config from '../config.json';
 import express from 'express';
+import fs from 'fs';
 import sequelize from '../database/sequelize';
+import { validate } from '../lib/validator/core';
 import {
   errorResponse,
   jwtAuth,
   pagingParams,
-  responseStatus
+  responseStatus,
+  uploader
 } from '../helper';
-import { HiringPartner, Student, StudentHiredReport, StudentInvitation, User } from '../database/models';
+import {
+  HiringPartner,
+  Student,
+  StudentHiredReport,
+  StudentInvitation,
+  User
+} from '../database/models';
 
 const router = express.Router();
+const hostName = config.HOSTNAME;
+const path = '/files/student/hired';
 
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit, resigned, hiringPartnerId, studentId } = req.query;
+  const { offset, limit, resigned, hiringPartnerId, studentId, processed } = req.query;
   let whereClause = {};
 
   if (resigned !== 'undefined') {
@@ -30,6 +41,11 @@ router.get('/', pagingParams, (req, res) => {
   if (studentId) {
     whereClause = Object.assign(whereClause, {
       studentId
+    });
+  }
+  if (processed) {
+    whereClause = Object.assign(whereClause, {
+      processed
     });
   }
 
@@ -118,16 +134,19 @@ router.get('/:id', (req, res) => {
     });
 });
 
-router.post(
-  '/',
-  checkBody([
-    { field: 'id' },
-    { field: 'studentId' },
-    { field: 'hiringPartnerId' },
-    { field: 'startDate' }
-  ]),
-  (req, res) => {
-    try {
+router.post('/', (req, res) => {
+  const upload = uploader(path, 'OL', {
+    profilePicture: 'pdf|doc|docx'
+  }).fields([{ name: 'offeringLetter' }]);
+
+  try {
+    upload(req, res, err => {
+      // check upload image process
+      if (err) {
+        return errorResponse(err.message, res, err.message);
+      }
+
+      const { offeringLetter } = req.files;
       const {
         id,
         studentId,
@@ -137,87 +156,184 @@ router.post(
         startDate,
         salary
       } = req.body;
+      const offeringLetterPath = offeringLetter ?
+        `${path}/${offeringLetter[0].filename}` :
+        null;
 
-      sequelize.
-        transaction(tr => {
-          return StudentHiredReport.create({
-            id,
-            studentId,
-            hiringPartnerId,
-            jobTitle: jobTitle || '',
-            location: location || '',
-            startDate: startDate || '',
-            salary: salary || 0
-          }, { transaction: tr }).then(result => {
-            return StudentInvitation.update({
-              status: 'hired',
-              updatedBy: 'hiring-partner'
-            }, {
-              where: { id },
-              transaction: tr
-            }).then(() => {
-              return Student.update({
-                isAvailable: false
-              }, {
-                where: { id: studentId },
-                transaction: tr
-              }).then(() => {
-                return result;
-              });
-            });
-          });
-        }).
-        then(result => {
-          return res.json({
-            status: responseStatus.SUCCESS,
-            message: 'Data Saved !',
-            result: {
-              id: result.id
-            }
-          });
-        }).
-        catch(error => {
-          return errorResponse(error, res);
-        });
-    } catch (error) {
-      return errorResponse(error, res);
-    }
-  }
-);
+      // form validation
+      const validationResult = validate(
+        [
+          { field: 'id' },
+          { field: 'studentId' },
+          { field: 'hiringPartnerId' },
+          { field: 'startDate' }
+        ],
+        req.body
+      );
 
-router.put('/:id', (req, res) => {
-  StudentHiredReport.findByPk(req.params.id).
-    then(obj => {
-      if (!obj) {
-        return res.json({
-          status: responseStatus.NOT_FOUND,
-          message: 'Data not found !'
+      if (validationResult.length > 0) {
+        if (offeringLetterPath) {
+          fs.unlinkSync(`./src/public${offeringLetterPath}`);
+        }
+
+        return res.status(422).json({
+          status: responseStatus.NOT_VALID,
+          message: 'Requested data is not valid',
+          result: validationResult
         });
       }
-      const { jobTitle, location, startDate, salary } = req.body;
 
-      obj.
-        update({
-          jobTitle: jobTitle || obj.jobTitle,
-          location: location || obj.location,
-          startDate: startDate || obj.startDate,
-          salary: salary || obj.salary
-        }).
-        then(() =>
-          res.json({
-            status: responseStatus.SUCCESS,
-            message: 'Data updated !',
-            result: {
-              id: obj.id
-            }
-          })).
-        catch(error => {
-          return errorResponse(error, res);
-        });
-    }).
-    catch(error => {
-      return errorResponse(error, res);
+      try {
+        sequelize.
+          transaction(tr => {
+            return StudentHiredReport.create(
+              {
+                id,
+                studentId,
+                hiringPartnerId,
+                jobTitle: jobTitle || '',
+                location: location || '',
+                startDate: startDate || '',
+                salary: salary || 0,
+                offeringLetter: offeringLetter ?
+                  `${hostName}${offeringLetterPath}` :
+                  null,
+                processed: false
+
+                // processed: processed !== undefined ? processed : obj.processed
+              },
+              { transaction: tr }
+            ).then(result => {
+              return StudentInvitation.update(
+                {
+                  status: 'hired',
+                  updatedBy: 'hiring-partner'
+                },
+                {
+                  where: { id },
+                  transaction: tr
+                }
+              ).then(() => {
+                return Student.update(
+                  {
+                    isAvailable: false
+                  },
+                  {
+                    where: { id: studentId },
+                    transaction: tr
+                  }
+                ).then(() => {
+                  return result;
+                });
+              });
+            });
+          }).
+          then(result => {
+            return res.json({
+              status: responseStatus.SUCCESS,
+              message: 'Data Saved !',
+              result: {
+                id: result.id
+              }
+            });
+          }).
+          catch(error => {
+            return errorResponse(error, res);
+          });
+      } catch (error) {
+        if (offeringLetterPath) {
+          fs.unlinkSync(`./src/public${offeringLetterPath}`);
+        }
+
+        return errorResponse(error, res);
+      }
     });
+  } catch (error) {
+    return errorResponse(error, res);
+  }
+});
+
+router.put('/:id', (req, res) => {
+  const upload = uploader(path, 'OL', {
+    profilePicture: 'pdf|doc|docx'
+  }).fields([{ name: 'offeringLetter' }]);
+
+  try {
+    upload(req, res, err => {
+      // check upload image process
+      if (err) {
+        return errorResponse(err.message, res, err.message);
+      }
+
+      const { offeringLetter } = req.files;
+      const offeringLetterPath = offeringLetter ?
+        `${path}/${offeringLetter[0].filename}` :
+        null;
+      const { jobTitle, location, startDate, salary, processed } = req.body;
+
+      try {
+        StudentHiredReport.findByPk(req.params.id).
+          then(obj => {
+            if (!obj) {
+              return res.json({
+                status: responseStatus.NOT_FOUND,
+                message: 'Data not found !'
+              });
+            }
+            if (offeringLetterPath && obj.user.offeringLetter) {
+              fs.unlinkSync(
+                `./src/public${obj.offeringLetter.replace(hostName, '')}`
+              );
+            }
+
+            obj.
+              update({
+                jobTitle: jobTitle || obj.jobTitle,
+                location: location || obj.location,
+                startDate: startDate || obj.startDate,
+                salary: salary || obj.salary,
+                offeringLetter: offeringLetter ?
+                  `${hostName}${offeringLetterPath}` :
+                  obj.offeringLetter,
+                processed:
+                  processed !== undefined || processed !== 'undefined' ?
+                    processed :
+                    obj.processed
+              }).
+              then(() =>
+                res.json({
+                  status: responseStatus.SUCCESS,
+                  message: 'Data updated !',
+                  result: {
+                    id: obj.id
+                  }
+                })).
+              catch(error => {
+                if (offeringLetterPath) {
+                  fs.unlinkSync(`./src/public${offeringLetterPath}`);
+                }
+
+                return errorResponse(error, res);
+              });
+          }).
+          catch(error => {
+            if (offeringLetterPath) {
+              fs.unlinkSync(`./src/public${offeringLetterPath}`);
+            }
+
+            return errorResponse(error, res);
+          });
+      } catch (error) {
+        if (offeringLetterPath) {
+          fs.unlinkSync(`./src/public${offeringLetterPath}`);
+        }
+
+        return errorResponse(error, res);
+      }
+    });
+  } catch (error) {
+    return errorResponse(error, res);
+  }
 });
 
 router.delete('/:id', (req, res) => {

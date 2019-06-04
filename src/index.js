@@ -8,6 +8,7 @@ import {
   CertificationRegistrationRouter,
   CertificationRouter,
   CityRouter,
+  GeneralSettingRouter,
   HiringPartnerRegistrationRouter,
   HiringPartnerRouter,
   HPRegistrationFormRouter,
@@ -64,6 +65,7 @@ app.use('/admins', AdminRouter);
 app.use('/certifications', CertificationRouter);
 app.use('/certification-registrations', CertificationRegistrationRouter);
 app.use('/cities', CityRouter);
+app.use('/general-settings', GeneralSettingRouter);
 app.use('/hp-registrations', HiringPartnerRegistrationRouter);
 app.use('/hiring-partners', HiringPartnerRouter);
 app.use('/hp-registration-forms', HPRegistrationFormRouter);

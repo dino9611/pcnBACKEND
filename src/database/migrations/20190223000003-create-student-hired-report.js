@@ -43,6 +43,13 @@ module.exports = {
         type: Sequelize.DECIMAL,
         defaultValue: 0
       },
+      offeringLetter: {
+        type: Sequelize.STRING
+      },
+      processed: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       resigned: {
         type: Sequelize.BOOLEAN,
         defaultValue: false

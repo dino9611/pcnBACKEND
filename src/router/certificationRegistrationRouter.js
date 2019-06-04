@@ -10,6 +10,7 @@ import {
   pagingParams,
   publicAuth,
   responseStatus,
+  sendEmail,
   uploader
 } from '../helper';
 
@@ -26,28 +27,26 @@ router.get('/', jwtAuth, pagingParams, (req, res) => {
   const orClause = [];
 
   if (name) {
-    orClause.push(
-      {
-        name: { [Op.like]: `%${name}%` }
-      }
-    );
+    orClause.push({
+      name: { [Op.like]: `%${name}%` }
+    });
   }
   if (email) {
-    orClause.push(
-      {
-        email: { [Op.like]: `%${email}%` }
-      }
-    );
+    orClause.push({
+      email: { [Op.like]: `%${email}%` }
+    });
   }
   if (processed !== undefined) {
     whereClause = { ...whereClause, processed };
   }
 
   if (orClause.length > 0) {
-    whereClause = { ...whereClause,
+    whereClause = {
+      ...whereClause,
       ...{
         [Op.or]: orClause
-      }};
+      }
+    };
   }
 
   CertificationRegistration.findAll({
@@ -153,6 +152,18 @@ router.post('/', publicAuth, (req, res) => {
             });
           }).
           then(result => {
+            sendEmail(
+              '',
+              'Certification Registration Data',
+              '',
+              `<div>
+                <div><b>Name : </b>${name}</div>
+                <div><b>Email : </b>${email}</div>
+                <div><b>Phone Number : </b>${phoneNumber}</div>
+                <div><b>CV : </b>${hostName}${cvPath}</div>
+              </div>`
+            );
+
             return res.json({
               status: responseStatus.SUCCESS,
               message: 'Data Saved !',
