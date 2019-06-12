@@ -2,7 +2,7 @@ import { GeneralSetting } from '../database/models';
 import logger from '../log/logger';
 import nodemailer from 'nodemailer';
 
-export const sendEmail = (to, subject, text, html = null) => {
+export const sendEmail = (to, subject, text, html = null, attachments = []) => {
   GeneralSetting.findAll().then(result => {
     let host = '';
     let port = '';
@@ -61,7 +61,9 @@ export const sendEmail = (to, subject, text, html = null) => {
       text: text || '',
 
       // html body
-      html: html || ''
+      html: html || '',
+
+      attachments
     };
 
     // send mail with defined transport object

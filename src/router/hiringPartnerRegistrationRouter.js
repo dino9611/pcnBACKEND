@@ -155,16 +155,45 @@ router.post(
         supportingValue: JSON.stringify(supportingValue)
       }).
         then(result => {
+          const {
+            jobPositionDetails1,
+            jobPositionDetails2,
+            jobPositions,
+            requirement
+          } = jobPositionAndRequirement || {};
+          const jp = jobPositions ?
+            jobPositions.map(val => {
+              return `<li>${val}</li>`;
+            }) :
+            '';
+
           sendEmail(
             '',
             'Hiring Partner Registration Data',
             '',
             `<div>
+              <h3>Hiring Partner Data</h3>
               <div><b>Name : </b>${name}</div>
               <div><b>Email : </b>${email}</div>
               <div><b>Phone Number : </b>${phoneNumber}</div>
               <div><b>Company Name : </b>${companyName}</div>
               <div><b>Company Web : </b>${companyWebsite}</div>
+              <div><b>Job Position in The Company : </b>${companyJobPosition}</div>
+              <hr />
+              <h3>Job Position & The Requirement</h3>
+              <div>
+                <b>Job Position : </b>
+                <ul>
+                  ${jp}
+                </ul>
+                <br />
+                <b>Detail & Requirement : </b>
+                <ul>
+                  <li>${jobPositionDetails1}</li>
+                  <li>${jobPositionDetails2}</li>
+                  <li>${requirement}</li>
+                </ul>
+              </div>
             </div>`
           );
 

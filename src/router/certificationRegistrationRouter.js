@@ -160,8 +160,20 @@ router.post('/', publicAuth, (req, res) => {
                 <div><b>Name : </b>${name}</div>
                 <div><b>Email : </b>${email}</div>
                 <div><b>Phone Number : </b>${phoneNumber}</div>
-                <div><b>CV : </b>${hostName}${cvPath}</div>
-              </div>`
+                <div><b>POB : </b>${pob}</div>
+                <div><b>DOB : </b>${dob}</div>
+
+                <div><b>Address : </b>${address}</div>
+                <div><b>Current Job Position : </b>${currentJobPosition}</div>
+                <div><b>Last Education : </b>${lastEducation}</div>
+                <div><b>Find This Program From : </b>${findThisProgram}</div>
+                <div><b>I join this program because : </b>${reason}</div>
+              </div>`,
+              [
+                {
+                  path: `./src/public${cvPath}`
+                }
+              ]
             );
 
             return res.json({
