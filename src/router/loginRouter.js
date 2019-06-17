@@ -65,6 +65,7 @@ router.post(
                       name: obj.name,
                       type: 'admin',
                       token,
+                      profilePicture: usr.profilePicture,
                       isSuperAdmin: obj.isSuperAdmin
                     }
                   });
@@ -93,6 +94,7 @@ router.post(
                       name: obj.name,
                       type: 'hiring-partner',
                       token,
+                      profilePicture: usr.profilePicture,
                       useHiringFee: obj.useHiringFee
                     }
                   });
@@ -120,6 +122,7 @@ router.post(
                       id: obj.id,
                       name: obj.name,
                       type: 'student',
+                      profilePicture: usr.profilePicture,
                       token
                     }
                   });
