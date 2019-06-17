@@ -66,9 +66,9 @@ router.get('/', jwtAuth, pagingParams, (req, res) => {
     ],
     offset,
     limit,
-    order: [[ 'createdAt', 'DESC' ]]
-  }).
-    then(result => {
+    order: [['createdAt', 'DESC']]
+  })
+    .then(result => {
       result.forEach(hpr => {
         hpr.jobPositionAndRequirement = JSON.parse(
           hpr.jobPositionAndRequirement
@@ -84,8 +84,8 @@ router.get('/', jwtAuth, pagingParams, (req, res) => {
           total
         });
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -102,8 +102,8 @@ router.get('/:id', jwtAuth, (req, res) => {
       'jobPositionAndRequirement',
       'supportingValue'
     ]
-  }).
-    then(result => {
+  })
+    .then(result => {
       if (result) {
         result.jobPositionAndRequirement = JSON.parse(
           result.jobPositionAndRequirement
@@ -115,8 +115,8 @@ router.get('/:id', jwtAuth, (req, res) => {
         message: result ? 'Get data success !' : 'Data not found',
         result: result || {}
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -127,9 +127,7 @@ router.post(
   checkBody([
     { field: 'name' },
     { field: 'email', validationType: validationType.isEmail },
-    { field: 'phoneNumber' },
-    { field: 'jobPositionAndRequirement' },
-    { field: 'supportingValue' }
+    { field: 'phoneNumber' }
   ]),
   (req, res) => {
     try {
@@ -153,19 +151,20 @@ router.post(
         companyJobPosition,
         jobPositionAndRequirement: JSON.stringify(jobPositionAndRequirement),
         supportingValue: JSON.stringify(supportingValue)
-      }).
-        then(result => {
+      })
+        .then(result => {
+          console.log(jobPositionAndRequirement);
           const {
             jobPositionDetails1,
             jobPositionDetails2,
             jobPositions,
             requirement
           } = jobPositionAndRequirement || {};
-          const jp = jobPositions ?
-            jobPositions.map(val => {
-              return `<li>${val}</li>`;
-            }) :
-            '';
+          const jp = jobPositions
+            ? jobPositions.map(val => {
+                return `<li>${val}</li>`;
+              })
+            : '';
 
           sendEmail(
             '',
@@ -173,25 +172,34 @@ router.post(
             '',
             `<div>
               <h3>Hiring Partner Data</h3>
-              <div><b>Name : </b>${name}</div>
-              <div><b>Email : </b>${email}</div>
-              <div><b>Phone Number : </b>${phoneNumber}</div>
-              <div><b>Company Name : </b>${companyName}</div>
-              <div><b>Company Web : </b>${companyWebsite}</div>
-              <div><b>Job Position in The Company : </b>${companyJobPosition}</div>
+              <div><b>Name : </b>${name || ''}</div>
+              <div><b>Email : </b>${email || ''}</div>
+              <div><b>Phone Number : </b>${phoneNumber || ''}</div>
+              <div><b>Company Name : </b>${companyName || ''}</div>
+              <div><b>Company Web : </b>${companyWebsite || ''}</div>
+              <div><b>Job Position in The Company : </b>${companyJobPosition ||
+                ''}</div>
               <hr />
               <h3>Job Position & The Requirement</h3>
               <div>
                 <b>Job Position : </b>
                 <ul>
-                  ${jp}
+                  ${jp || ''}
                 </ul>
                 <br />
                 <b>Detail & Requirement : </b>
                 <ul>
-                  <li>${jobPositionDetails1}</li>
-                  <li>${jobPositionDetails2}</li>
-                  <li>${requirement}</li>
+                  ${
+                    jobPositionDetails1
+                      ? ''
+                      : '<li>' + jobPositionDetails1 + '</li>'
+                  }
+                  ${
+                    jobPositionDetails2
+                      ? ''
+                      : '<li>' + jobPositionDetails2 + '</li>'
+                  }
+                  ${requirement ? '' : '<li>' + requirement + '</li>'}
                 </ul>
               </div>
             </div>`
@@ -204,8 +212,8 @@ router.post(
               id: result.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
     } catch (error) {
@@ -215,8 +223,8 @@ router.post(
 );
 
 router.put('/:id', jwtAuth, (req, res) => {
-  HiringPartnerRegistration.findByPk(req.params.id).
-    then(obj => {
+  HiringPartnerRegistration.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -235,42 +243,98 @@ router.put('/:id', jwtAuth, (req, res) => {
         processed
       } = req.body;
 
-      obj.
-        update({
+      obj
+        .update({
           name: name || obj.name,
           email: email || obj.email,
           phoneNumber: phoneNumber || obj.phoneNumber,
           companyName: companyName || obj.companyName,
           companyWebsite: companyWebsite || obj.companyWebsite,
           companyJobPosition: companyJobPosition || obj.companyJobPosition,
-          jobPositionAndRequirement: jobPositionAndRequirement ?
-            JSON.stringify(jobPositionAndRequirement) :
-            obj.jobPositionAndRequirement,
-          supportingValue: supportingValue ?
-            JSON.stringify(supportingValue) :
-            obj.supportingValue,
+          jobPositionAndRequirement: jobPositionAndRequirement
+            ? JSON.stringify(jobPositionAndRequirement)
+            : obj.jobPositionAndRequirement,
+          supportingValue: supportingValue
+            ? JSON.stringify(supportingValue)
+            : obj.supportingValue,
           processed: processed !== undefined ? processed : obj.processed
-        }).
-        then(() =>
+        })
+        .then(() => {
+          if (processed) {
+            const jpr = JSON.parse(obj.jobPositionAndRequirement);
+            const {
+              jobPositionDetails1,
+              jobPositionDetails2,
+              jobPositions,
+              requirement
+            } = jpr || {};
+
+            const jp = jobPositions
+              ? jobPositions.map(val => {
+                  return `<li>${val}</li>`;
+                })
+              : '';
+
+            sendEmail(
+              '',
+              'Hiring Partner Registration Data',
+              '',
+              `<div>
+                <h3>Hiring Partner Data</h3>
+                <div><b>Name : </b>${obj.name || ''}</div>
+                <div><b>Email : </b>${obj.email || ''}</div>
+                <div><b>Phone Number : </b>${obj.phoneNumber || ''}</div>
+                <div><b>Company Name : </b>${obj.companyName || ''}</div>
+                <div><b>Company Web : </b>${obj.companyWebsite || ''}</div>
+                <div><b>Job Position in The Company : </b>${obj.companyJobPosition ||
+                  ''}</div>
+                <hr />
+                <h3>Job Position & The Requirement</h3>
+                <div>
+                  <b>Job Position : </b>
+                  <ul>
+                    ${jp || ''}
+                  </ul>
+                  <br />
+                  <b>Detail & Requirement : </b>
+                  <ul>
+                    ${
+                      jobPositionDetails1
+                        ? '<li>' + jobPositionDetails1 + '</li>'
+                        : ''
+                    }
+                    ${
+                      jobPositionDetails2
+                        ? '<li>' + jobPositionDetails2 + '</li>'
+                        : ''
+                    }
+                    ${requirement ? '<li>' + requirement + '</li>' : ''}
+                  </ul>
+                </div>
+              </div>`
+            );
+          }
+
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data updated !',
             result: {
               id: obj.id
             }
-          })).
-        catch(error => {
+          });
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.delete('/:id', jwtAuth, (req, res) => {
-  HiringPartnerRegistration.findByPk(req.params.id).
-    then(obj => {
+  HiringPartnerRegistration.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -278,9 +342,9 @@ router.delete('/:id', jwtAuth, (req, res) => {
         });
       }
 
-      obj.
-        destroy().
-        then(() => {
+      obj
+        .destroy()
+        .then(() => {
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data deleted !',
@@ -288,12 +352,12 @@ router.delete('/:id', jwtAuth, (req, res) => {
               id: obj.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });

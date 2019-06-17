@@ -26,7 +26,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
   }
   if (key) {
     whereClause = Object.assign(whereClause, {
-      key: { [Op.like]: `%${key}%` }
+      key
     });
   }
 

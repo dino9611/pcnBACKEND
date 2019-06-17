@@ -2,6 +2,7 @@ import { checkBody } from '../lib/validator';
 import express from 'express';
 import moment from 'moment';
 import sequelize from '../database/sequelize';
+// import sequelize from '../database/sequelize';
 import {
   errorResponse,
   jwtAuth,
@@ -25,9 +26,9 @@ router.get('/', pagingParams, (req, res) => {
   const { offset, limit, status, studentId, hiringPartnerId } = req.query;
   let whereClause = {
     scheduleDate: {
-      [Op.gte]: moment().
-        subtract(7, 'days').
-        toDate()
+      [Op.gte]: moment()
+        .subtract(7, 'days')
+        .toDate()
     }
   };
 
@@ -74,7 +75,7 @@ router.get('/', pagingParams, (req, res) => {
           {
             model: User,
             as: 'user',
-            attributes: [ 'email', 'profilePicture', 'type' ]
+            attributes: ['email', 'profilePicture', 'type']
           }
         ]
       },
@@ -100,20 +101,20 @@ router.get('/', pagingParams, (req, res) => {
           {
             model: User,
             as: 'user',
-            attributes: [ 'email', 'profilePicture', 'type' ]
+            attributes: ['email', 'profilePicture', 'type']
           }
         ]
       },
       {
         model: StudentInvitationReschedule,
         as: 'studentInvitationReschedule',
-        order: [[ 'createdAt', 'DESC' ]],
+        order: [['createdAt', 'DESC']],
         limit: 1
       }
     ],
-    order: [[ 'updatedAt', 'DESC' ]]
-  }).
-    then(result => {
+    order: [['updatedAt', 'DESC']]
+  })
+    .then(result => {
       StudentInvitation.count({ where: whereClause }).then(total => {
         res.json({
           status: responseStatus.SUCCESS,
@@ -122,22 +123,22 @@ router.get('/', pagingParams, (req, res) => {
           total
         });
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.get('/:id', (req, res) => {
-  StudentInvitation.findByPk(req.params.id).
-    then(result => {
+  StudentInvitation.findByPk(req.params.id)
+    .then(result => {
       res.json({
         status: result ? responseStatus.SUCCESS : responseStatus.NOT_FOUND,
         message: result ? 'Get data success !' : 'Data not found',
         result: result || {}
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -173,8 +174,8 @@ router.post(
         interviewRejectedReason: interviewRejectedReason || '',
         updatedBy: updatedBy || '',
         rejectedReason: rejectedReason || ''
-      }).
-        then(result => {
+      })
+        .then(result => {
           return res.json({
             status: responseStatus.SUCCESS,
             message: 'Data Saved !',
@@ -182,8 +183,8 @@ router.post(
               id: result.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
     } catch (error) {
@@ -193,8 +194,8 @@ router.post(
 );
 
 router.put('/:id', (req, res) => {
-  StudentInvitation.findByPk(req.params.id).
-    then(obj => {
+  StudentInvitation.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -212,8 +213,8 @@ router.put('/:id', (req, res) => {
         rejectedReason
       } = req.body;
 
-      obj.
-        update({
+      obj
+        .update({
           studentId: studentId || obj.studentId,
           status: status || obj.status,
           scheduleDate: scheduleDate || obj.scheduleDate,
@@ -223,27 +224,28 @@ router.put('/:id', (req, res) => {
             interviewRejectedReason || obj.interviewRejectedReason,
           updatedBy: updatedBy || obj.updatedBy,
           rejectedReason: rejectedReason || obj.rejectedReason
-        }).
-        then(() =>
+        })
+        .then(() =>
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data updated !',
             result: {
               id: obj.id
             }
-          })).
-        catch(error => {
+          })
+        )
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.delete('/:id', (req, res) => {
-  StudentInvitation.findByPk(req.params.id).
-    then(obj => {
+  StudentInvitation.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -251,9 +253,9 @@ router.delete('/:id', (req, res) => {
         });
       }
 
-      obj.
-        destroy().
-        then(() => {
+      obj
+        .destroy()
+        .then(() => {
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data deleted !',
@@ -261,12 +263,12 @@ router.delete('/:id', (req, res) => {
               id: obj.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });

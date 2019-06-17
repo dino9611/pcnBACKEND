@@ -53,9 +53,9 @@ router.get('/', jwtAuth, pagingParams, (req, res) => {
     where: whereClause,
     offset,
     limit,
-    order: [[ 'createdAt', 'DESC' ]]
-  }).
-    then(result => {
+    order: [['createdAt', 'DESC']]
+  })
+    .then(result => {
       CertificationRegistration.count({ where: whereClause }).then(total => {
         res.json({
           status: responseStatus.SUCCESS,
@@ -64,22 +64,22 @@ router.get('/', jwtAuth, pagingParams, (req, res) => {
           total
         });
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.get('/:id', jwtAuth, (req, res) => {
-  CertificationRegistration.findByPk(req.params.id).
-    then(result => {
+  CertificationRegistration.findByPk(req.params.id)
+    .then(result => {
       res.json({
         status: result ? responseStatus.SUCCESS : responseStatus.NOT_FOUND,
         message: result ? 'Get data success !' : 'Data not found',
         result: result || {}
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -130,8 +130,8 @@ router.post('/', publicAuth, (req, res) => {
       }
 
       try {
-        sequelize.
-          transaction(tr => {
+        sequelize
+          .transaction(tr => {
             return CertificationRegistration.create(
               {
                 name,
@@ -150,30 +150,34 @@ router.post('/', publicAuth, (req, res) => {
             ).then(result => {
               return result;
             });
-          }).
-          then(result => {
+          })
+          .then(result => {
             sendEmail(
               '',
               'Certification Registration Data',
               '',
               `<div>
-                <div><b>Name : </b>${name}</div>
-                <div><b>Email : </b>${email}</div>
-                <div><b>Phone Number : </b>${phoneNumber}</div>
-                <div><b>POB : </b>${pob}</div>
-                <div><b>DOB : </b>${dob}</div>
+                <div><b>Name : </b>${name || ''}</div>
+                <div><b>Email : </b>${email || ''}</div>
+                <div><b>Phone Number : </b>${phoneNumber || ''}</div>
+                <div><b>POB : </b>${pob || ''}</div>
+                <div><b>DOB : </b>${dob || ''}</div>
 
-                <div><b>Address : </b>${address}</div>
-                <div><b>Current Job Position : </b>${currentJobPosition}</div>
-                <div><b>Last Education : </b>${lastEducation}</div>
-                <div><b>Find This Program From : </b>${findThisProgram}</div>
-                <div><b>I join this program because : </b>${reason}</div>
+                <div><b>Address : </b>${address || ''}</div>
+                <div><b>Current Job Position : </b>${currentJobPosition ||
+                  ''}</div>
+                <div><b>Last Education : </b>${lastEducation || ''}</div>
+                <div><b>Find This Program From : </b>${findThisProgram ||
+                  ''}</div>
+                <div><b>I join this program because : </b>${reason || ''}</div>
               </div>`,
-              [
-                {
-                  path: `./src/public${cvPath}`
-                }
-              ]
+              cvPath
+                ? [
+                    {
+                      path: `./src/public${cvPath}`
+                    }
+                  ]
+                : []
             );
 
             return res.json({
@@ -183,8 +187,8 @@ router.post('/', publicAuth, (req, res) => {
                 id: result.id
               }
             });
-          }).
-          catch(error => {
+          })
+          .catch(error => {
             if (cvPath) {
               fs.unlinkSync(`./src/public${cvPath}`);
             }
@@ -205,8 +209,8 @@ router.post('/', publicAuth, (req, res) => {
 });
 
 router.put('/:id', jwtAuth, (req, res) => {
-  CertificationRegistration.findByPk(req.params.id).
-    then(obj => {
+  CertificationRegistration.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -227,8 +231,8 @@ router.put('/:id', jwtAuth, (req, res) => {
         processed
       } = req.body;
 
-      obj.
-        update({
+      obj
+        .update({
           name: name || obj.name,
           email: email || obj.email,
           pob: pob || obj.pob,
@@ -240,30 +244,61 @@ router.put('/:id', jwtAuth, (req, res) => {
           findThisProgram: findThisProgram || obj.findThisProgram,
           reason: reason || obj.reason,
           processed:
-            processed === 'undefined' || processed === undefined ?
-              obj.processed :
-              processed
-        }).
-        then(() =>
+            processed === 'undefined' || processed === undefined
+              ? obj.processed
+              : processed
+        })
+        .then(() => {
+          if (processed) {
+            sendEmail(
+              '',
+              'Certification Registration Data',
+              '',
+              `<div>
+                <div><b>Name : </b>${obj.name || ''}</div>
+                <div><b>Email : </b>${obj.email || ''}</div>
+                <div><b>Phone Number : </b>${obj.phoneNumber || ''}</div>
+                <div><b>POB : </b>${obj.pob || ''}</div>
+                <div><b>DOB : </b>${obj.dob || ''}</div>
+  
+                <div><b>Address : </b>${obj.address || ''}</div>
+                <div><b>Current Job Position : </b>${obj.currentJobPosition ||
+                  ''}</div>
+                <div><b>Last Education : </b>${obj.lastEducation || ''}</div>
+                <div><b>Find This Program From : </b>${obj.findThisProgram ||
+                  ''}</div>
+                <div><b>I join this program because : </b>${obj.reason ||
+                  ''}</div>
+              </div>`,
+              obj.cv
+                ? [
+                    {
+                      path: obj.cv
+                    }
+                  ]
+                : []
+            );
+          }
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data updated !',
             result: {
               id: obj.id
             }
-          })).
-        catch(error => {
+          });
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.delete('/:id', jwtAuth, (req, res) => {
-  CertificationRegistration.findByPk(req.params.id).
-    then(obj => {
+  CertificationRegistration.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -271,9 +306,9 @@ router.delete('/:id', jwtAuth, (req, res) => {
         });
       }
 
-      obj.
-        destroy().
-        then(() => {
+      obj
+        .destroy()
+        .then(() => {
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data deleted !',
@@ -281,12 +316,12 @@ router.delete('/:id', jwtAuth, (req, res) => {
               id: obj.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
