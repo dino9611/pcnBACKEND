@@ -166,6 +166,8 @@ router.post('/', (req, res) => {
           { field: 'id' },
           { field: 'studentId' },
           { field: 'hiringPartnerId' },
+          { field: 'jobTitle' },
+          { field: 'location' },
           { field: 'startDate' }
         ],
         req.body
@@ -197,7 +199,7 @@ router.post('/', (req, res) => {
                 salary: salary || 0,
                 offeringLetter: offeringLetter ?
                   `${hostName}${offeringLetterPath}` :
-                  null,
+                  '',
                 processed: false
 
                 // processed: processed !== undefined ? processed : obj.processed
