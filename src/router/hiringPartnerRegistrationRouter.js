@@ -153,7 +153,6 @@ router.post(
         supportingValue: JSON.stringify(supportingValue)
       })
         .then(result => {
-          console.log(jobPositionAndRequirement);
           const {
             jobPositionDetails1,
             jobPositionDetails2,
@@ -191,13 +190,13 @@ router.post(
                 <ul>
                   ${
                     jobPositionDetails1
-                      ? ''
-                      : '<li>' + jobPositionDetails1 + '</li>'
+                      ? '<li>' + jobPositionDetails1 + '</li>'
+                      : ''
                   }
                   ${
                     jobPositionDetails2
-                      ? ''
-                      : '<li>' + jobPositionDetails2 + '</li>'
+                      ? '<li>' + jobPositionDetails2 + '</li>'
+                      : ''
                   }
                   ${requirement ? '' : '<li>' + requirement + '</li>'}
                 </ul>

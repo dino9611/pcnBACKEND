@@ -152,6 +152,7 @@ router.post('/', publicAuth, (req, res) => {
             });
           })
           .then(result => {
+            console.log(pob, dob);
             sendEmail(
               '',
               'Certification Registration Data',

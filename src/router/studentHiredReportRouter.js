@@ -1,6 +1,5 @@
 import config from '../config.json';
 import express from 'express';
-import fs from 'fs';
 import sequelize from '../database/sequelize';
 import { validate } from '../lib/validator/core';
 import {
@@ -25,7 +24,14 @@ const path = '/files/student/hired';
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit, resigned, hiringPartnerId, studentId, processed } = req.query;
+  const {
+    offset,
+    limit,
+    resigned,
+    hiringPartnerId,
+    studentId,
+    processed
+  } = req.query;
   let whereClause = {};
 
   if (resigned !== 'undefined') {
@@ -43,9 +49,15 @@ router.get('/', pagingParams, (req, res) => {
       studentId
     });
   }
-  if (processed) {
+  // if (processed) {
+  //   whereClause = Object.assign(whereClause, {
+  //     processed
+  //   });
+  // }
+  if (processed != 'undefined' && processed != undefined) {
+    const status = processed === 'true';
     whereClause = Object.assign(whereClause, {
-      processed
+      processed: status
     });
   }
 
@@ -70,7 +82,7 @@ router.get('/', pagingParams, (req, res) => {
           {
             model: User,
             as: 'user',
-            attributes: [ 'email', 'profilePicture', 'type' ]
+            attributes: ['email', 'profilePicture', 'type']
           }
         ]
       },
@@ -96,16 +108,16 @@ router.get('/', pagingParams, (req, res) => {
           {
             model: User,
             as: 'user',
-            attributes: [ 'email', 'profilePicture', 'type' ]
+            attributes: ['email', 'profilePicture', 'type']
           }
         ]
       }
     ],
     offset,
     limit,
-    order: [[ 'updatedAt', 'DESC' ]]
-  }).
-    then(result => {
+    order: [['updatedAt', 'DESC']]
+  })
+    .then(result => {
       StudentHiredReport.count({ where: whereClause }).then(total => {
         res.json({
           status: responseStatus.SUCCESS,
@@ -114,22 +126,22 @@ router.get('/', pagingParams, (req, res) => {
           total
         });
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.get('/:id', (req, res) => {
-  StudentHiredReport.findByPk(req.params.id).
-    then(result => {
+  StudentHiredReport.findByPk(req.params.id)
+    .then(result => {
       res.json({
         status: result ? responseStatus.SUCCESS : responseStatus.NOT_FOUND,
         message: result ? 'Get data success !' : 'Data not found',
         result: result || {}
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -156,9 +168,9 @@ router.post('/', (req, res) => {
         startDate,
         salary
       } = req.body;
-      const offeringLetterPath = offeringLetter ?
-        `${path}/${offeringLetter[0].filename}` :
-        null;
+      const offeringLetterPath = offeringLetter
+        ? `${path}/${offeringLetter[0].filename}`
+        : null;
 
       // form validation
       const validationResult = validate(
@@ -186,8 +198,8 @@ router.post('/', (req, res) => {
       }
 
       try {
-        sequelize.
-          transaction(tr => {
+        sequelize
+          .transaction(tr => {
             return StudentHiredReport.create(
               {
                 id,
@@ -197,9 +209,9 @@ router.post('/', (req, res) => {
                 location: location || '',
                 startDate: startDate || '',
                 salary: salary || 0,
-                offeringLetter: offeringLetter ?
-                  `${hostName}${offeringLetterPath}` :
-                  '',
+                offeringLetter: offeringLetter
+                  ? `${hostName}${offeringLetterPath}`
+                  : '',
                 processed: false
 
                 // processed: processed !== undefined ? processed : obj.processed
@@ -229,8 +241,8 @@ router.post('/', (req, res) => {
                 });
               });
             });
-          }).
-          then(result => {
+          })
+          .then(result => {
             return res.json({
               status: responseStatus.SUCCESS,
               message: 'Data Saved !',
@@ -238,8 +250,8 @@ router.post('/', (req, res) => {
                 id: result.id
               }
             });
-          }).
-          catch(error => {
+          })
+          .catch(error => {
             return errorResponse(error, res);
           });
       } catch (error) {
@@ -256,91 +268,135 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-  const upload = uploader(path, 'OL', {
-    profilePicture: 'pdf|doc|docx'
-  }).fields([{ name: 'offeringLetter' }]);
+  if (req.params.id === 'bulk') {
+    const data = req.body;
 
-  try {
-    upload(req, res, err => {
-      // check upload image process
-      if (err) {
-        return errorResponse(err.message, res, err.message);
-      }
+    if (Array.isArray(data)) {
+      sequelize
+        .transaction(tr => {
+          const processList = [];
 
-      const { offeringLetter } = req.files;
-      const offeringLetterPath = offeringLetter ?
-        `${path}/${offeringLetter[0].filename}` :
-        null;
-      const { jobTitle, location, startDate, salary, processed } = req.body;
+          for (const dt of data) {
+            let updatedData = {};
 
-      try {
-        StudentHiredReport.findByPk(req.params.id).
-          then(obj => {
-            if (!obj) {
-              return res.json({
-                status: responseStatus.NOT_FOUND,
-                message: 'Data not found !'
-              });
-            }
-            if (offeringLetterPath && obj.user.offeringLetter) {
-              fs.unlinkSync(
-                `./src/public${obj.offeringLetter.replace(hostName, '')}`
-              );
+            if (dt.processed != 'undefined' && dt.processed != undefined) {
+              updatedData = {
+                updatedData,
+                ...{ processed: dt.processed }
+              };
             }
 
-            obj.
-              update({
-                jobTitle: jobTitle || obj.jobTitle,
-                location: location || obj.location,
-                startDate: startDate || obj.startDate,
-                salary: salary || obj.salary,
-                offeringLetter: offeringLetter ?
-                  `${hostName}${offeringLetterPath}` :
-                  obj.offeringLetter,
-                processed:
-                  processed !== undefined || processed !== 'undefined' ?
-                    processed :
-                    obj.processed
-              }).
-              then(() =>
-                res.json({
-                  status: responseStatus.SUCCESS,
-                  message: 'Data updated !',
-                  result: {
-                    id: obj.id
-                  }
-                })).
-              catch(error => {
-                if (offeringLetterPath) {
-                  fs.unlinkSync(`./src/public${offeringLetterPath}`);
-                }
+            processList.push(
+              StudentHiredReport.update(updatedData, {
+                where: { id: dt.id },
+                transaction: tr
+              })
+            );
+          }
 
-                return errorResponse(error, res);
-              });
-          }).
-          catch(error => {
-            if (offeringLetterPath) {
-              fs.unlinkSync(`./src/public${offeringLetterPath}`);
+          return Promise.all(processList);
+        })
+        .then(() => {
+          return res.json({
+            message: 'Data Saved !',
+            result: {
+              status: responseStatus.SUCCESS,
+              message: 'Data updated !'
             }
-
-            return errorResponse(error, res);
           });
-      } catch (error) {
-        if (offeringLetterPath) {
-          fs.unlinkSync(`./src/public${offeringLetterPath}`);
+        })
+        .catch(error => {
+          return errorResponse(error, res);
+        });
+    }
+  } else {
+    const upload = uploader(path, 'OL', {
+      profilePicture: 'pdf|doc|docx'
+    }).fields([{ name: 'offeringLetter' }]);
+
+    try {
+      upload(req, res, err => {
+        // check upload image process
+        if (err) {
+          return errorResponse(err.message, res, err.message);
         }
 
-        return errorResponse(error, res);
-      }
-    });
-  } catch (error) {
-    return errorResponse(error, res);
+        const { offeringLetter } = req.files;
+        const offeringLetterPath = offeringLetter
+          ? `${path}/${offeringLetter[0].filename}`
+          : null;
+        const { jobTitle, location, startDate, salary, processed } = req.body;
+
+        try {
+          StudentHiredReport.findByPk(req.params.id)
+            .then(obj => {
+              if (!obj) {
+                return res.json({
+                  status: responseStatus.NOT_FOUND,
+                  message: 'Data not found !'
+                });
+              }
+              if (offeringLetterPath && obj.user.offeringLetter) {
+                fs.unlinkSync(
+                  `./src/public${obj.offeringLetter.replace(hostName, '')}`
+                );
+              }
+
+              obj
+                .update({
+                  jobTitle: jobTitle || obj.jobTitle,
+                  location: location || obj.location,
+                  startDate: startDate || obj.startDate,
+                  salary: salary || obj.salary,
+                  offeringLetter: offeringLetter
+                    ? `${hostName}${offeringLetterPath}`
+                    : obj.offeringLetter,
+                  processed:
+                    processed !== undefined || processed !== 'undefined'
+                      ? processed
+                      : obj.processed
+                })
+                .then(() =>
+                  res.json({
+                    status: responseStatus.SUCCESS,
+                    message: 'Data updated !',
+                    result: {
+                      id: obj.id
+                    }
+                  })
+                )
+                .catch(error => {
+                  if (offeringLetterPath) {
+                    fs.unlinkSync(`./src/public${offeringLetterPath}`);
+                  }
+
+                  return errorResponse(error, res);
+                });
+            })
+            .catch(error => {
+              if (offeringLetterPath) {
+                fs.unlinkSync(`./src/public${offeringLetterPath}`);
+              }
+
+              return errorResponse(error, res);
+            });
+        } catch (error) {
+          if (offeringLetterPath) {
+            fs.unlinkSync(`./src/public${offeringLetterPath}`);
+          }
+
+          return errorResponse(error, res);
+        }
+      });
+    } catch (error) {
+      return errorResponse(error, res);
+    }
   }
 });
 
 router.delete('/:id', (req, res) => {
-  StudentHiredReport.findByPk(req.params.id).
-    then(obj => {
+  StudentHiredReport.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -348,9 +404,9 @@ router.delete('/:id', (req, res) => {
         });
       }
 
-      obj.
-        destroy().
-        then(() => {
+      obj
+        .destroy()
+        .then(() => {
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data deleted !',
@@ -358,12 +414,12 @@ router.delete('/:id', (req, res) => {
               id: obj.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });

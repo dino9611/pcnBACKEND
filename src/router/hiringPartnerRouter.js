@@ -25,7 +25,7 @@ const Op = sequelize.Op;
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { limit, offset, name, slug } = req.query;
+  const { limit, offset, name, slug, useHiringFee } = req.query;
   let whereClause = {};
 
   if (name) {
@@ -40,6 +40,13 @@ router.get('/', pagingParams, (req, res) => {
     });
   }
 
+  if (useHiringFee != 'undefined' && useHiringFee != undefined) {
+    const status = useHiringFee === 'true';
+    whereClause = Object.assign(whereClause, {
+      useHiringFee: status
+    });
+  }
+
   HiringPartner.findAll({
     where: whereClause,
     offset,
@@ -48,12 +55,12 @@ router.get('/', pagingParams, (req, res) => {
       {
         model: User,
         as: 'user',
-        attributes: [ 'email', 'profilePicture', 'type' ]
+        attributes: ['email', 'profilePicture', 'type']
       }
     ],
-    order: [[ 'createdAt', 'DESC' ]]
-  }).
-    then(result => {
+    order: [['createdAt', 'DESC']]
+  })
+    .then(result => {
       if (!result) {
         return res.json({
           status: responseStatus.SUCCESS,
@@ -71,8 +78,8 @@ router.get('/', pagingParams, (req, res) => {
           total
         });
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -84,18 +91,18 @@ router.get('/:id', (req, res) => {
       {
         model: User,
         as: 'user',
-        attributes: [ 'email', 'profilePicture', 'type' ]
+        attributes: ['email', 'profilePicture', 'type']
       }
     ]
-  }).
-    then(result => {
+  })
+    .then(result => {
       return res.json({
         status: result ? responseStatus.SUCCESS : responseStatus.NOT_FOUND,
         message: result ? 'Get data success !' : 'Data not found',
         result: result || {}
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -129,9 +136,9 @@ router.post('/', (req, res) => {
         linkedin,
         useHiringFee
       } = req.body;
-      const ppPath = profilePicture ?
-        `${path}/${profilePicture[0].filename}` :
-        null;
+      const ppPath = profilePicture
+        ? `${path}/${profilePicture[0].filename}`
+        : null;
 
       // form validation
       const validationResult = validate(
@@ -157,17 +164,17 @@ router.post('/', (req, res) => {
       }
       const password = decrypt(appKey, ep);
 
-      generateHiringPartnerSlug(name).
-        then(slug => {
-          sequelize.
-            transaction(tr => {
+      generateHiringPartnerSlug(name)
+        .then(slug => {
+          sequelize
+            .transaction(tr => {
               return User.create(
                 {
                   email,
                   password: generateHash(password),
-                  profilePicture: profilePicture ?
-                    `${hostName}${ppPath}` :
-                    null,
+                  profilePicture: profilePicture
+                    ? `${hostName}${ppPath}`
+                    : null,
                   type: 'hiring-partner'
                 },
                 { transaction: tr }
@@ -184,7 +191,9 @@ router.post('/', (req, res) => {
                     summary,
                     teamSize,
                     profileVideo,
-                    website,
+                    website: website
+                      ? website.replace(/https?\:(\\\\|\/\/)(www.)?/, '')
+                      : '',
                     facebook,
                     linkedin,
                     useHiringFee
@@ -194,8 +203,8 @@ router.post('/', (req, res) => {
                   return result;
                 });
               });
-            }).
-            then(result => {
+            })
+            .then(result => {
               return res.json({
                 status: responseStatus.SUCCESS,
                 message: 'Data Saved !',
@@ -204,16 +213,16 @@ router.post('/', (req, res) => {
                   name: result.name
                 }
               });
-            }).
-            catch(error => {
+            })
+            .catch(error => {
               if (ppPath) {
                 fs.unlinkSync(`./src/public${ppPath}`);
               }
 
               return errorResponse(error, res);
             });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           if (ppPath) {
             fs.unlinkSync(`./src/public${ppPath}`);
           }
@@ -255,9 +264,10 @@ router.put('/:id', (req, res) => {
         linkedin,
         useHiringFee
       } = req.body;
-      const ppPath = profilePicture ?
-        `${path}/${profilePicture[0].filename}` :
-        null;
+      console.log(website.replace(/https?\:(\\\\|\/\/)(www.)?/, ''));
+      const ppPath = profilePicture
+        ? `${path}/${profilePicture[0].filename}`
+        : null;
       const password = ep ? decrypt(appKey, ep) : null;
 
       try {
@@ -266,11 +276,11 @@ router.put('/:id', (req, res) => {
             {
               model: User,
               as: 'user',
-              attributes: [ 'email', 'profilePicture', 'type' ]
+              attributes: ['email', 'profilePicture', 'type']
             }
           ]
-        }).
-          then(obj => {
+        })
+          .then(obj => {
             if (!obj) {
               return res.json({
                 status: responseStatus.NOT_FOUND,
@@ -284,10 +294,10 @@ router.put('/:id', (req, res) => {
               );
             }
 
-            sequelize.
-              transaction(tr => {
-                return obj.
-                  update(
+            sequelize
+              .transaction(tr => {
+                return obj
+                  .update(
                     {
                       name: name || obj.name,
                       phoneNumber: phoneNumber || obj.phoneNumber,
@@ -297,32 +307,34 @@ router.put('/:id', (req, res) => {
                       summary: summary || obj.summary,
                       teamSize: teamSize || obj.teamSize,
                       profileVideo: profileVideo || obj.profileVideo,
-                      website: website || obj.website,
+                      website: website
+                        ? website.replace(/https?\:(\\\\|\/\/)(www.)?/, '')
+                        : obj.website,
                       facebook: facebook || obj.facebook,
                       linkedin: linkedin || obj.linkedin,
                       useHiringFee:
-                        useHiringFee === 'undefined' ?
-                          obj.useHiringFee :
-                          useHiringFee
+                        useHiringFee === 'undefined'
+                          ? obj.useHiringFee
+                          : useHiringFee
                     },
                     { transaction: tr }
-                  ).
-                  then(() => {
+                  )
+                  .then(() => {
                     return User.findByPk(obj.id).then(usr => {
                       if (usr) {
-                        return usr.
-                          update({
+                        return usr
+                          .update({
                             email: email || usr.email,
                             password:
                               (password ? generateHash(password) : null) ||
                               usr.password,
-                            profilePicture: profilePicture ?
-                              `${hostName}${path}/${
-                                profilePicture[0].filename
-                              }` :
-                              usr.profilePicture
-                          }).
-                          then(() => {
+                            profilePicture: profilePicture
+                              ? `${hostName}${path}/${
+                                  profilePicture[0].filename
+                                }`
+                              : usr.profilePicture
+                          })
+                          .then(() => {
                             return obj;
                           });
                       }
@@ -330,8 +342,8 @@ router.put('/:id', (req, res) => {
                       return obj;
                     });
                   });
-              }).
-              then(result => {
+              })
+              .then(result => {
                 return res.json({
                   status: responseStatus.SUCCESS,
                   message: 'Data updated !',
@@ -340,16 +352,16 @@ router.put('/:id', (req, res) => {
                     name: result.name
                   }
                 });
-              }).
-              catch(error => {
+              })
+              .catch(error => {
                 if (ppPath) {
                   fs.unlinkSync(`./src/public${ppPath}`);
                 }
 
                 return errorResponse(error, res);
               });
-          }).
-          catch(error => {
+          })
+          .catch(error => {
             return errorResponse(error, res);
           });
       } catch (error) {
@@ -366,8 +378,8 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  HiringPartner.findByPk(req.params.id).
-    then(obj => {
+  HiringPartner.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -376,15 +388,15 @@ router.delete('/:id', (req, res) => {
       }
 
       try {
-        obj.
-          destroy().
-          then(() => {
-            User.findByPk(req.params.id).
-              then(usr => {
+        obj
+          .destroy()
+          .then(() => {
+            User.findByPk(req.params.id)
+              .then(usr => {
                 if (usr) {
-                  usr.
-                    destroy().
-                    then(() => {
+                  usr
+                    .destroy()
+                    .then(() => {
                       if (usr.profilePicture) {
                         fs.unlinkSync(
                           `./src/public${usr.profilePicture.replace(
@@ -402,24 +414,24 @@ router.delete('/:id', (req, res) => {
                           name: obj.name
                         }
                       });
-                    }).
-                    catch(error => {
+                    })
+                    .catch(error => {
                       return errorResponse(error, res);
                     });
                 }
-              }).
-              catch(error => {
+              })
+              .catch(error => {
                 return errorResponse(error, res);
               });
-          }).
-          catch(error => {
+          })
+          .catch(error => {
             return errorResponse(error, res);
           });
       } catch (error) {
         return errorResponse(error, res);
       }
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });

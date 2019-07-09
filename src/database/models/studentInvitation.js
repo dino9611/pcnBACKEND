@@ -30,12 +30,15 @@ module.exports = (sequelize, DataTypes) => {
       interviewRejectedReason: {
         type: DataTypes.STRING(1000)
       },
+      rejectedReason: {
+        type: DataTypes.STRING(1000)
+      },
+      read: {
+        type: DataTypes.BOOLEAN
+      },
       updatedBy: {
         type: DataTypes.STRING
       },
-      rejectedReason: {
-        type: DataTypes.STRING(1000)
-      }
     },
     {}
   );

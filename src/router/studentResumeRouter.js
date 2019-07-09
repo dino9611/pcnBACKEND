@@ -36,7 +36,8 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
     skills,
     jobPreferences,
     slug,
-    onlyAvailable
+    onlyAvailable,
+    cities
   } = req.query;
   let whereClause = {};
   const required = Boolean(onlyAvailable);
@@ -52,7 +53,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
     jobPreferences.length > 0
   ) {
     const filter = jobPreferences.map(val => {
-      return { jobPreferences: { [Op.like]: `%${val}%` }};
+      return { jobPreferences: { [Op.like]: `%${val}%` } };
     });
 
     whereClause = Object.assign(whereClause, { [Op.or]: filter });
@@ -61,6 +62,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
   let jiFilter = null;
   let skillFilter = null;
   let studentFilter = null;
+  let cityFilter = null;
 
   if (jobRoles && Array.isArray(jobRoles) && jobRoles.length > 0) {
     jiFilter = {};
@@ -78,11 +80,19 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
 
     skillFilter = Object.assign(skillFilter, { [Op.or]: filter });
   }
+  if (cities && Array.isArray(cities) && cities.length > 0) {
+    studentFilter = {};
+    const filter = cities.map(val => {
+      return { city: val };
+    });
+
+    studentFilter = Object.assign(studentFilter, { [Op.or]: filter });
+  }
   if (slug) {
-    studentFilter = { slug };
+    studentFilter = { ...studentFilter, slug };
   }
   if (onlyAvailable) {
-    studentFilter = { isAvailable: true };
+    studentFilter = { ...studentFilter, isAvailable: true };
   }
 
   StudentResume.findAll({
@@ -111,7 +121,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
           {
             model: User,
             as: 'user',
-            attributes: [ 'email', 'profilePicture', 'type' ]
+            attributes: ['email', 'profilePicture', 'type']
           }
         ]
       },
@@ -119,16 +129,16 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         model: StudentSkill,
         as: 'studentSkill',
         required,
-        attributes: [ 'id', 'position' ],
-        include: [{ model: Skill, as: 'skill', attributes: [ 'id', 'skill' ]}],
+        attributes: ['id', 'position'],
+        include: [{ model: Skill, as: 'skill', attributes: ['id', 'skill'] }],
         where: skillFilter
       },
       {
         model: StudentProgram,
         as: 'studentProgram',
-        attributes: [ 'id', 'batch', 'year', 'highlight' ],
+        attributes: ['id', 'batch', 'year', 'highlight'],
         include: [
-          { model: Program, as: 'program', attributes: [ 'id', 'program' ]}
+          { model: Program, as: 'program', attributes: ['id', 'program'] }
         ]
       },
       {
@@ -136,7 +146,7 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         as: 'studentWorkExperience',
 
         // required,
-        attributes: [ 'id', 'jobTitle', 'company', 'from', 'to', 'description' ]
+        attributes: ['id', 'jobTitle', 'company', 'from', 'to', 'description']
       },
       {
         model: StudentEducation,
@@ -157,28 +167,28 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         as: 'studentJobInterest',
 
         // required,
-        attributes: [ 'id', 'experience', 'highlight' ],
+        attributes: ['id', 'experience', 'highlight'],
         include: [
-          { model: JobRole, as: 'jobRole', attributes: [ 'id', 'jobRole' ]}
+          { model: JobRole, as: 'jobRole', attributes: ['id', 'jobRole'] }
         ],
         where: jiFilter
       },
       {
         model: StudentCertification,
         as: 'studentCertification',
-        attributes: [ 'id' ],
+        attributes: ['id'],
         include: [
           {
             model: Certification,
             as: 'certification',
-            attributes: [ 'id', 'certification' ]
+            attributes: ['id', 'certification']
           }
         ]
       }
     ],
     order: [
-      [{ model: StudentSkill, as: 'studentSkill' }, 'position' ],
-      [{ model: StudentEducation, as: 'studentEducation' }, 'endDate', 'DESC' ],
+      [{ model: StudentSkill, as: 'studentSkill' }, 'position'],
+      [{ model: StudentEducation, as: 'studentEducation' }, 'endDate', 'DESC'],
       [
         { model: StudentJobInterest, as: 'studentJobInterest' },
         'highlight',
@@ -189,10 +199,10 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
         'to',
         'DESC'
       ],
-      [{ model: StudentProgram, as: 'studentProgram' }, 'year', 'DESC' ]
+      [{ model: StudentProgram, as: 'studentProgram' }, 'year', 'DESC']
     ]
-  }).
-    then(result => {
+  })
+    .then(result => {
       StudentResume.count({ where: whereClause }).then(total => {
         res.json({
           status: responseStatus.SUCCESS,
@@ -201,15 +211,15 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
           total
         });
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.get('/:id', publicAuth, (req, res) => {
   StudentResume.findByPk(req.params.id, {
-    attributes: [ 'id', 'summary', 'jobPreferences' ],
+    attributes: ['id', 'summary', 'jobPreferences'],
     include: [
       {
         model: Student,
@@ -230,20 +240,20 @@ router.get('/:id', publicAuth, (req, res) => {
           {
             model: User,
             as: 'user',
-            attributes: [ 'email', 'profilePicture', 'type' ]
+            attributes: ['email', 'profilePicture', 'type']
           }
         ]
       }
     ]
-  }).
-    then(result => {
+  })
+    .then(result => {
       res.json({
         status: result ? responseStatus.SUCCESS : responseStatus.NOT_FOUND,
         message: result ? 'Get data success !' : 'Data not found',
         result: result || {}
       });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
@@ -264,8 +274,8 @@ router.post(
         id: studentId,
         summary,
         jobPreferences
-      }).
-        then(result => {
+      })
+        .then(result => {
           return res.json({
             status: responseStatus.SUCCESS,
             message: 'Data Saved !',
@@ -273,8 +283,8 @@ router.post(
               id: result.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
     } catch (error) {
@@ -284,8 +294,8 @@ router.post(
 );
 
 router.put('/:id', jwtAuth, (req, res) => {
-  StudentResume.findByPk(req.params.id).
-    then(obj => {
+  StudentResume.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -294,31 +304,32 @@ router.put('/:id', jwtAuth, (req, res) => {
       }
       const { summary, jobPreferences } = req.body;
 
-      obj.
-        update({
+      obj
+        .update({
           summary: summary || obj.summary,
           jobPreferences: jobPreferences || obj.jobPreferences
-        }).
-        then(() =>
+        })
+        .then(() =>
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data updated !',
             result: {
               id: obj.id
             }
-          })).
-        catch(error => {
+          })
+        )
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
 
 router.delete('/:id', jwtAuth, (req, res) => {
-  StudentResume.findByPk(req.params.id).
-    then(obj => {
+  StudentResume.findByPk(req.params.id)
+    .then(obj => {
       if (!obj) {
         return res.json({
           status: responseStatus.NOT_FOUND,
@@ -326,9 +337,9 @@ router.delete('/:id', jwtAuth, (req, res) => {
         });
       }
 
-      obj.
-        destroy().
-        then(() => {
+      obj
+        .destroy()
+        .then(() => {
           res.json({
             status: responseStatus.SUCCESS,
             message: 'Data deleted !',
@@ -336,12 +347,12 @@ router.delete('/:id', jwtAuth, (req, res) => {
               id: obj.id
             }
           });
-        }).
-        catch(error => {
+        })
+        .catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });

@@ -46,6 +46,15 @@ module.exports = {
       rejectedReason: {
         type: Sequelize.STRING(1000)
       },
+      read: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      updatedBy: {
+        type: Sequelize.STRING,
+        defaultValue: ''
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

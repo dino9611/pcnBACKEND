@@ -209,8 +209,9 @@ router.put('/:id', (req, res) => {
         location,
         message,
         interviewRejectedReason,
+        rejectedReason,
         updatedBy,
-        rejectedReason
+        read
       } = req.body;
 
       obj
@@ -222,8 +223,9 @@ router.put('/:id', (req, res) => {
           message: message || obj.message,
           interviewRejectedReason:
             interviewRejectedReason || obj.interviewRejectedReason,
+          rejectedReason: rejectedReason || obj.rejectedReason,
           updatedBy: updatedBy || obj.updatedBy,
-          rejectedReason: rejectedReason || obj.rejectedReason
+          read: read === 'undefined' || read === undefined ? obj.read : read
         })
         .then(() =>
           res.json({

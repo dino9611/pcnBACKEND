@@ -26,8 +26,19 @@ const path = '/files/student/resigned';
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit } = req.query;
-  const whereClause = {};
+  const { offset, limit, hiringPartnerId, studentId } = req.query;
+  let whereClause = {};
+
+  if (hiringPartnerId) {
+    whereClause = Object.assign(whereClause, {
+      hiringPartnerId
+    });
+  }
+  if (studentId) {
+    whereClause = Object.assign(whereClause, {
+      studentId
+    });
+  }
 
   StudentResignedReport.findAll({
     where: whereClause,
