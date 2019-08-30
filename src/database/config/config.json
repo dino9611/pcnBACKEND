@@ -17,9 +17,9 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
+    "username": "saitama",
+    "password": "Pl163178149;",
+    "database": "purwadhika_career",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "logging": false,
