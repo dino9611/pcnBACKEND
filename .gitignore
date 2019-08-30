@@ -20,3 +20,5 @@ src/config.json
 /src/public
 
 .htaccess
+
+.vscode/
