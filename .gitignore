@@ -8,8 +8,8 @@ dist/
 .env
 
 # ignore config file 
-src/database/config/config.json
-src/config.json
+# src/database/config/config.json
+# src/config.json
 
 .DS_store
 
