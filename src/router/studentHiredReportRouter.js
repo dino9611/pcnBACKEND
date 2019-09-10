@@ -185,6 +185,8 @@ router.post('/', (req, res) => {
         req.body
       );
 
+      console.log(validationResult)
+
       if (validationResult.length > 0) {
         if (offeringLetterPath) {
           fs.unlinkSync(`./src/public${offeringLetterPath}`);

@@ -49,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'hiringPartnerId',
       as: 'hiringPartner'
     });
+    StudentHiredReport.belongsTo(models.StudentInvitation, {
+      foreignKey: 'id'
+    });
   };
 
   return StudentHiredReport;

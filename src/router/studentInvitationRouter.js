@@ -161,13 +161,14 @@ router.post(
         message,
         interviewRejectedReason,
         updatedBy,
-        rejectedReason
+        rejectedReason,
+        status
       } = req.body;
 
       StudentInvitation.create({
         studentId,
         hiringPartnerId,
-        status: 'new',
+        status: status || 'new',
         scheduleDate,
         location,
         message: message || '',
