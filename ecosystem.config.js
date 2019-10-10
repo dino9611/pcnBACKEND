@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
       {
-        name: "Purwadhika",
+        name: "PurwadhikaCareerAPI",
         script: "./dist/index.js",
         env: {
           NODE_ENV: "development"
