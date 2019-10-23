@@ -25,3 +25,4 @@ export * from './studentProgramRouter';
 export * from './studentSkillRouter';
 export * from './studentWorkExperienceRouter';
 export * from './validateTokenRouter';
+export * from './emailerRouter'
