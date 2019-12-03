@@ -20,7 +20,8 @@ router.post(
     const { name, pass } = user;
     const appKey = config.APPKEY || 'careernetwork';
     const password = decrypt(appKey, pass);
-
+    console.log(password)
+    // console.log(user)
     const response = {
       ...{
         INVALID_PASSWORD: 'INVALID_PASSWORD'
@@ -40,8 +41,9 @@ router.post(
             message: 'User not found !.'
           });
         }
-
+        
         if (!compareHash(password, usr.password)) {
+          console.log('gagal')
           return res.status(200).json({
             status: response.INVALID_PASSWORD,
             message: 'Password didn\'t match !'
@@ -107,6 +109,7 @@ router.post(
               return errorResponse(error, res);
             });
         } else if (usr.type === 'student') {
+          console.log(usr.type)
           Student.findByPk(usr.id).
             then(obj => {
               usr.

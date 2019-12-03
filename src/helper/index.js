@@ -25,6 +25,7 @@ export const pagingParams = (req, res, next) => {
     offset = parseInt(((page || 1) - 1) * pSize, 10);
     limit = parseInt(pSize, 10);
   }
+  // console.log(offset)
   req.query.offset = offset;
   req.query.limit = limit;
 

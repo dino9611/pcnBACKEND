@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import config from './config.json';
 import express from 'express';
 import logger from './log/logger';
+import http from 'http';
+import socketIO from 'socket.io';
 import {
   AdminRouter,
   CertificationRegistrationRouter,
@@ -29,7 +31,7 @@ import {
   StudentResumeRouter,
   StudentRouter,
   StudentSkillRouter,
-
+  HiringPartnernotifRouter,
   StudentWorkExperienceRouter,
   SuccessStoryRouter,
   ValidateTokenRouter
@@ -50,6 +52,9 @@ app.use((req, res, next) => {
   next();
 });
 
+const server=http.createServer(app)
+const io=socketIO(server)
+app.io=io
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bearerToken());
@@ -91,10 +96,24 @@ app.use('/student-work-experiences', StudentWorkExperienceRouter);
 app.use('/success-stories', SuccessStoryRouter);
 app.use('/validate-token', ValidateTokenRouter);
 
+app.use('/student-invitations-notif',HiringPartnernotifRouter)
+
+
+
+
+//socket.io
+io.on('connection',socket=>{
+  console.log('User Connected')
+  // io.emit('konek','dino ganteng')
+  socket.on('disconnect',()=>{
+    console.log('user disconnected')
+  })
+})
+
 // list of router
 
-app.listen(port, '0.0.0.0', () => {
-  // console.log(`App running on port ${port}`);
+server.listen(port, '0.0.0.0', () => {
+  console.log(`App running on port ${port}`);
 });
 
 process.on('uncaughtException', error => {

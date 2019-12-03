@@ -27,7 +27,7 @@ import {
 const router = express.Router();
 const Op = sequelize.Op;
 
-router.get('/', publicAuth, pagingParams, (req, res) => {
+router.get('/',publicAuth, pagingParams, (req, res) => {
   const {
     offset,
     limit,
@@ -40,8 +40,10 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
     cities
   } = req.query;
   let whereClause = {};
+  console.log(req.query)
+  // console.log(onlyAvailable)
   const required = Boolean(onlyAvailable);
-
+  // console.log(required)
   if (name) {
     whereClause = Object.assign(whereClause, {
       name: { [Op.like]: `%${name}%` }
@@ -94,7 +96,9 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
   if (onlyAvailable) {
     studentFilter = { ...studentFilter, isAvailable: true };
   }
-
+  console.log(studentFilter)
+  console.log(skillFilter)
+  // console.log(offset)
   StudentResume.findAll({
     where: whereClause,
     offset,
@@ -203,7 +207,9 @@ router.get('/', publicAuth, pagingParams, (req, res) => {
     ]
   })
     .then(result => {
+      // console.log(result.length)
       StudentResume.count({ where: whereClause }).then(total => {
+        // console.log(total)
         res.json({
           status: responseStatus.SUCCESS,
           message: 'Get data success !',
