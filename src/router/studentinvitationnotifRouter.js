@@ -17,10 +17,15 @@ const router = express.Router();
 const Op = sequelize.Op;
 
 router.get('/',(req,res)=>{
-    const {  hiringPartnerId } = req.query;
-    var whereClause={hiringPartnerId,status:['new','interview_accepted','interview_rejected','rescheduled'],read:0}
+    const {  hiringPartnerId,studentId } = req.query;
+    var whereClause={status:['new','interview_accepted','interview_rejected','rescheduled']}
+    if(hiringPartnerId){
+      whereClause={...whereClause,hiringPartnerId,read:false}
+    }else{
+      whereClause={...whereClause,studentId,readstudent:false}
+    }
     StudentInvitation.count({ where: whereClause }).then(total => {
-        console.log(total)
+        // console.log(total)
         res.json({
           status: responseStatus.SUCCESS,
           message: 'Get data success !',

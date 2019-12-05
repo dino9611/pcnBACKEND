@@ -39,6 +39,9 @@ module.exports = (sequelize, DataTypes) => {
       updatedBy: {
         type: DataTypes.STRING
       },
+      readstudent:{
+        type: DataTypes.BOOLEAN
+      }
     },
     {}
   );

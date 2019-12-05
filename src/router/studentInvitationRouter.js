@@ -23,7 +23,7 @@ const Op = sequelize.Op;
 router.use(jwtAuth);
 
 router.get('/', pagingParams, (req, res) => {
-  const { offset, limit, status, studentId, hiringPartnerId } = req.query;
+  const { offset, limit, status, studentId, hiringPartnerId,resume } = req.query;
   // console.log(req.query)
   let whereClause = {
     //buat expired
@@ -119,11 +119,41 @@ router.get('/', pagingParams, (req, res) => {
     order: [['createdAt', 'DESC']]
   })
     .then(result => {
-      if(hiringPartnerId){
-        StudentInvitation.count({ where: whereClause }).then(total => {
-            StudentInvitation.update({read:1},{where:{hiringPartnerId},status:['new','interview_accepted','interview_rejected','rescheduled'],read:0}).then(()=>{
-              var whereClause1={hiringPartnerId,status:['new','interview_accepted','interview_rejected','rescheduled'],read:0}
-              StudentInvitation.count({ where: whereClause1 }).then(total1 => {
+      if(hiringPartnerId&&resume){
+        StudentInvitation.count({
+          where: whereClause 
+        }).then((total)=>{
+            console.log('masuksini')
+            res.json({
+              status: responseStatus.SUCCESS,
+              message: 'Get data success !',
+              result: result || [],
+              total
+            });
+        })
+      }else if(hiringPartnerId){
+        console.log('masuk')
+        StudentInvitation.count({
+           where: whereClause 
+          }).then(total => {
+            StudentInvitation.update({
+              read:true
+            },{
+              where:{
+                hiringPartnerId
+              },
+              status:[
+                'new',
+                'interview_accepted',
+                'interview_rejected',
+                'rescheduled'
+              ],
+              read:false
+            }).then(()=>{
+              var whereClause1={hiringPartnerId,status:['new','interview_accepted','interview_rejected','rescheduled'],read:false}
+              StudentInvitation.count({
+                 where: whereClause1
+                }).then(total1 => {
                   req.app.io.emit('masuk',total1)
                   res.json({
                     status: responseStatus.SUCCESS,
@@ -136,12 +166,33 @@ router.get('/', pagingParams, (req, res) => {
         });
       }else{
         StudentInvitation.count({ where: whereClause }).then(total => {
-            res.json({
-              status: responseStatus.SUCCESS,
-              message: 'Get data success !',
-              result: result || [],
-              total
-            });
+          StudentInvitation.update({
+            readstudent:true
+          },{
+            where:{
+              studentId
+            },
+            status:[
+              'new',
+              'interview_accepted',
+              'interview_rejected',
+              'rescheduled'
+            ],
+            readstudent:false
+          }).then(()=>{
+            var whereClause1={studentId,status:['new','interview_accepted','interview_rejected','rescheduled'],readstudent:false}
+            StudentInvitation.count({
+              where: whereClause1
+             }).then(total1 => {
+               req.app.io.emit('studentnotif',total1)
+               res.json({
+                 status: responseStatus.SUCCESS,
+                 message: 'Get data success !',
+                 result: result || [],
+                 total
+               });
+             });
+          })
         });
       }
     })
@@ -200,16 +251,20 @@ router.post(
         .then(result => {
           var whereClause={hiringPartnerId,status:['new','interview_accepted','interview_rejected','rescheduled'],read:0}
           StudentInvitation.count({ where: whereClause }).then(total => {
-            // console.log(total)
+              console.log(total)
               req.app.io.emit('masuk',total)
-              return res.json({
-                status: responseStatus.SUCCESS,
-                message: 'Data Saved !',
-                result: {
-                  id: result.id
-                }
-              });
-            });
+              var whereClause1={studentId,status:['new','interview_accepted','interview_rejected','rescheduled'],readstudent:0}
+              StudentInvitation.count({ where: whereClause1 }).then(total1 => {
+                req.app.io.emit('studentnotif',total1)
+                  return res.json({
+                    status: responseStatus.SUCCESS,
+                    message: 'Data Saved !',
+                    result: {
+                      id: result.id
+                    }
+                  });
+                })
+              })
         })
         .catch(error => {
           return errorResponse(error, res);
@@ -253,10 +308,10 @@ router.put('/:id', (req, res) => {
             interviewRejectedReason || obj.interviewRejectedReason,
           rejectedReason: rejectedReason || obj.rejectedReason,
           updatedBy: updatedBy || obj.updatedBy,
-          read: read === 'undefined' || read === undefined ? 0 : read
+          read: read === 'undefined' || read === undefined ? false : read
         })
         .then(() =>{
-          var whereClause1={hiringPartnerId,status:['new','interview_accepted','interview_rejected','rescheduled'],read:0}
+          var whereClause1={hiringPartnerId,status:['new','interview_accepted','interview_rejected','rescheduled'],read:false}
           StudentInvitation.count({ where: whereClause1 }).then( total => {
             req.app.io.emit('masuk',total)
             res.json({

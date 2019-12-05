@@ -51,6 +51,11 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
+      readstudent:{
+        allowNull: false,
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
       updatedBy: {
         type: Sequelize.STRING,
         defaultValue: ''
