@@ -14,9 +14,10 @@ import {
   Student,
   StudentHiredReport,
   StudentInvitation,
-  User
+  User,
+  notif
 } from '../database/models';
-
+const Op = sequelize.Op;
 const router = express.Router();
 const hostName = config.HOSTNAME;
 const path = '/files/student/hired';
@@ -148,7 +149,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const upload = uploader(path, 'OL', {
-    profilePicture: 'pdf|doc|docx'
+    offeringLetter: 'pdf|doc|docx'
   }).fields([{ name: 'offeringLetter' }]);
 
   try {
@@ -168,6 +169,7 @@ router.post('/', (req, res) => {
         startDate,
         salary
       } = req.body;
+      console.log(req.body)
       const offeringLetterPath = offeringLetter
         ? `${path}/${offeringLetter[0].filename}`
         : null;
@@ -180,18 +182,19 @@ router.post('/', (req, res) => {
           { field: 'hiringPartnerId' },
           { field: 'jobTitle' },
           { field: 'location' },
-          { field: 'startDate' }
+          { field: 'startDate' },
+          { field: 'salary' },
+          { field: 'processed' },
         ],
         req.body
       );
 
-      console.log(validationResult)
+
 
       if (validationResult.length > 0) {
         if (offeringLetterPath) {
           fs.unlinkSync(`./src/public${offeringLetterPath}`);
         }
-
         return res.status(422).json({
           status: responseStatus.NOT_VALID,
           message: 'Requested data is not valid',
@@ -245,13 +248,41 @@ router.post('/', (req, res) => {
             });
           })
           .then(result => {
-            return res.json({
-              status: responseStatus.SUCCESS,
-              message: 'Data Saved !',
-              result: {
-                id: result.id
-              }
-            });
+            var notifhp=null
+            var notifstud=`congrate hiring partner ${hiringPartnerId} offer you job `
+            var whereClause2={studentId,read:false,notifstud:{[Op.ne]:null}}
+            var sockiomsgisinotif='isinotifstud'
+            var sockiomsgnotif='notifstud'
+            notif.create({
+              hiringPartnerId,
+              studentId,
+              notif:notifhp,
+              notifstud,
+              read:0,
+              readstudent:0
+            }).then(()=>{
+              notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
+              .then((totalnotif)=>{
+                notif.findAll({where:whereClause2,order:[['createdAt', 'DESC']],limit:5})
+                .then((result1)=>{
+                  req.app.io.emit(sockiomsgnotif,totalnotif)
+                  req.app.io.emit(sockiomsgisinotif,result1)
+                  return res.json({
+                    status: responseStatus.SUCCESS,
+                    message: 'Data Saved !',
+                    result: {
+                      id: result.id
+                    }
+                  });
+                }).catch((err)=>{
+                  return errorResponse(err, res);
+                })
+              }).catch((err)=>{
+                return errorResponse(err, res);
+              })
+            }).catch((err)=>{
+              return errorResponse(err, res);
+            })
           })
           .catch(error => {
             return errorResponse(error, res);

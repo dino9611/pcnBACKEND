@@ -28,7 +28,6 @@ export const validate = (params, source) => {
     const field = data.field || '';
     const type = data.validationType || validationType.exists;
     const result = checkValidation(source[field], type);
-
     if (!result.isValid) {
       validationResult.push({
         field,
@@ -38,6 +37,5 @@ export const validate = (params, source) => {
       // validationResult[field] = { error: data.message || result.defaultError }
     }
   });
-
   return validationResult;
 };

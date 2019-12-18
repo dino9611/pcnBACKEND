@@ -11,8 +11,10 @@ export const uploader = (destination, fileNamePrefix, extensions = null) => {
 
   const imageFilter = (req, file, callback) => {
     if (extensions) {
+      console.log(file)
+      console.log(extensions[file.fieldname])
       const extFilter = extensions[file.fieldname];
-
+      // console.log(extFilter)
       if (extFilter) {
         // const ext = /\.(jpg|jpeg|png|gif|pdf|doc|docx|xlsx)$/;
         const ext = new RegExp(`.(${extFilter})$`);

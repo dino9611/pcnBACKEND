@@ -14,8 +14,10 @@ import {
   Student,
   StudentInvitation,
   StudentInvitationReschedule,
-  User
+  User,
+  notif
 } from '../database/models';
+
 
 const router = express.Router();
 const Op = sequelize.Op;
@@ -253,18 +255,51 @@ router.post(
           StudentInvitation.count({ where: whereClause }).then(total => {
               console.log(total)
               req.app.io.emit('masuk',total)
-              var whereClause1={studentId,status:['new','interview_accepted','interview_rejected','rescheduled'],readstudent:0}
-              StudentInvitation.count({ where: whereClause1 }).then(total1 => {
-                req.app.io.emit('studentnotif',total1)
-                  return res.json({
-                    status: responseStatus.SUCCESS,
-                    message: 'Data Saved !',
-                    result: {
-                      id: result.id
-                    }
-                  });
+              notif.create({
+                hiringPartnerId,
+                studentId,
+                notif:`Undangan Telah dikirim Ke Kandidat`,
+                notifstud:'Anda baru mendapat undangan Dari hiring-partner cek inivitationmu',
+                read:false,
+                readstudent:false
+              }).then(()=>{
+                var whereClause2={hiringPartnerId,read:false,notif:{[Op.ne]:null}}
+                var whereClause3={studentId,readstudent:false,notifstud:{[Op.ne]:null}}
+                notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
+                .then((totalnotif)=>{
+                  notif.findAll({where:whereClause2,order:[['createdAt', 'DESC']],limit:5})
+                  .then((result1)=>{
+                    notif.count({where:whereClause3,order:[['createdAt', 'DESC']]})
+                    .then((totalnotifstud)=>{
+                      notif.findAll({where:whereClause3,order:[['createdAt', 'DESC']],limit:5})
+                      .then((isinotifstud)=>{
+                        req.app.io.emit('notif',totalnotif)
+                        req.app.io.emit('notifstud',totalnotifstud)
+                        req.app.io.emit('isinotif',result1)
+                        req.app.io.emit('isinotifstud',isinotifstud)
+                        var whereClause1={studentId,status:['new','interview_accepted','interview_rejected','rescheduled'],readstudent:0}
+                        StudentInvitation.count({ where: whereClause1 }).then(total1 => {
+                          req.app.io.emit('studentnotif',total1)
+                            return res.json({
+                              status: responseStatus.SUCCESS,
+                              message: 'Data Saved !',
+                              result: {
+                                id: result.id
+                              }
+                            });
+                          })
+                        })
+                      })
+                    })
+                  }).catch((err)=>{
+                    return errorResponse(err, res);
+                  })
+                }).catch((err)=>{
+                  return errorResponse(err, res);
                 })
-              })
+            }).catch((err)=>{
+              return errorResponse(err, res);
+            })
         })
         .catch(error => {
           return errorResponse(error, res);
@@ -312,21 +347,73 @@ router.put('/:id', (req, res) => {
         })
         .then(() =>{
           var whereClause1={hiringPartnerId,status:['new','interview_accepted','interview_rejected','rescheduled'],read:false}
-          StudentInvitation.count({ where: whereClause1 }).then( total => {
-            req.app.io.emit('masuk',total)
-            res.json({
-              status: responseStatus.SUCCESS,
-              message: 'Data updated !',
-              result: {
-                id: obj.id
-              }
-            })
-          });
+          var notifhp=null
+          var notifstud=null
+          var whereClause2={}
+          var sockiomsgnotif=''
+          var sockiomsgisinotif=''
+          // req.app.io.emit('notif',totalnotif)
+          // req.app.io.emit('notifstud',totalnotifstud)
+          // req.app.io.emit('isinotif',result1)
+          // req.app.io.emit('isinotifstud',isinotifstud)
+          if(status=='interview_accepted'&&updatedBy=='student'){
+            notifhp=`undangan interview untuk kandidate dengan id= ${studentId} telah diterima `
+            whereClause2={hiringPartnerId,read:false,notif:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotif'
+            sockiomsgnotif='notif'
+          }else if(status=='interview_rejected'&&updatedBy=='student'){
+            notifhp=`undangan interview telah ditolak oleh kandidat dengan id=${studentId}`
+            whereClause2={hiringPartnerId,read:false,notif:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotif'
+            sockiomsgnotif='notif'
+          }else if(status=='rescheduled'&&updatedBy=='student'){
+            notifhp=`kandidat dengan id =${studentId}mengajukan rescheduled`
+            whereClause2={hiringPartnerId,read:false,notif:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotif'
+            sockiomsgnotif='notif'
+          }else if(status=='rejected'&& updatedBy=='hiring-partner'){
+            notifstud=`Maaf anda has been rejected from interview with hiring partner ${hiringPartnerId}`
+            whereClause2={studentId,read:false,notifstud:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotifstud'
+            sockiomsgnotif='notifstud'
           }
-        )
-        .catch(error => {
-          return errorResponse(error, res);
-        });
+          notif.create({
+            hiringPartnerId,
+            studentId,
+            notif:notifhp,
+            notifstud,
+            read:0,
+            readstudent:0
+          }).then(()=>{
+            notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
+            .then((totalnotif)=>{
+              notif.findAll({where:whereClause2,order:[['createdAt', 'DESC']],limit:5})
+              .then((result1)=>{
+                req.app.io.emit(sockiomsgnotif,totalnotif)
+                req.app.io.emit(sockiomsgisinotif,result1)
+                StudentInvitation.count({ where: whereClause1 })
+                .then( total => {
+                  req.app.io.emit('masuk',total)
+                  res.json({
+                    status: responseStatus.SUCCESS,
+                    message: 'Data updated !',
+                    result: {
+                      id: obj.id
+                    }
+                  })
+                });
+              }).catch((err)=>{
+                return errorResponse(err, res);
+              })
+            }).catch((err)=>{
+              return errorResponse(err, res);
+            })
+          }).catch((err)=>{
+            return errorResponse(err, res);
+          })
+      }).catch(error => {
+        return errorResponse(error, res);
+      });
     })
     .catch(error => {
       return errorResponse(error, res);

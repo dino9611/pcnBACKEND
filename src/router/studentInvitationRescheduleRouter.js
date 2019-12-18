@@ -9,7 +9,8 @@ import {
 } from '../helper';
 import {
   StudentInvitation,
-  StudentInvitationReschedule
+  StudentInvitationReschedule,
+  notif
 } from '../database/models';
 
 const router = express.Router();
@@ -71,7 +72,9 @@ router.post(
         status,
         location,
         message,
-        proposedBy
+        proposedBy,
+        studentId,
+        hiringPartnerId
       } = req.body;
 
       // StudentInvitationReschedule.create({
@@ -150,13 +153,52 @@ router.post(
           });
         }).
         then(result => {
-          return res.json({
-            status: responseStatus.SUCCESS,
-            message: 'Data Saved !',
-            result: {
-              id: result.id
-            }
-          });
+          var notifhp=null
+          var notifstud=null
+          var whereClause2={}
+          var sockiomsgnotif=''
+          var sockiomsgisinotif=''
+          if(proposedBy==='student'){
+            notifhp=`kandidat dengan id =${studentId}mengajukan rescheduled invitations check detailnya di manage talent`
+            whereClause2={hiringPartnerId,read:false,notif:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotif'
+            sockiomsgnotif='notif'
+          }else if(proposedBy==='hiring-partner'){
+            notifstud=` Hiring partner dengan id =${hiringPartnerId}mengajukan rescheduled interview check detailnya di menu your invitations`
+            whereClause2={studentId,read:false,notifstud:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotifstud'
+            sockiomsgnotif='notifstud'
+          }
+          notif.create({
+            hiringPartnerId,
+            studentId,
+            notif:notifhp,
+            notifstud,
+            read:0,
+            readstudent:0
+          }).then(()=>{
+            notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
+            .then((totalnotif)=>{
+              notif.findAll({where:whereClause2,order:[['createdAt', 'DESC']],limit:5})
+              .then((result1)=>{
+                req.app.io.emit(sockiomsgnotif,totalnotif)
+                req.app.io.emit(sockiomsgisinotif,result1)
+                return res.json({
+                  status: responseStatus.SUCCESS,
+                  message: 'Data Saved !',
+                  result: {
+                    id: result.id
+                  }
+                });
+              }).catch((err)=>{
+                return errorResponse(err, res);
+              })
+            }).catch((err)=>{
+              return errorResponse(err, res);
+            })
+          }).catch((err)=>{
+            return errorResponse(err, res);
+          })
         }).
         catch(error => {
           return errorResponse(error, res);
@@ -182,6 +224,8 @@ router.put('/:id', (req, res) => {
         location,
         message,
         proposedBy,
+        studentId,
+        hiringPartnerId,
         interviewRejectedReason
       } = req.body;
 
@@ -218,19 +262,66 @@ router.put('/:id', (req, res) => {
               return obj;
             });
         }).
-        then(() =>
-          res.json({
-            status: responseStatus.SUCCESS,
-            message: 'Data updated !',
-            result: {
-              id: obj.id
+        then(() =>{
+          var notifhp=null
+          var notifstud=null
+          var whereClause2={}
+          var sockiomsgnotif=''
+          var sockiomsgisinotif=''
+          if(proposedBy==='student'){
+            if(status=='accepted'){
+              notifhp=`kandidat dengan id =${studentId} menerima jadwal interview yang diajukan `
+            }else{
+              notifhp=`kandidat dengan id =${studentId} menolak jadwal interview yang diajukan `
             }
-          })).
-        catch(error => {
+            whereClause2={hiringPartnerId,read:false,notif:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotif'
+            sockiomsgnotif='notif'
+          }else if(proposedBy==='hiring-partner'){
+            if(status=='accepted'){
+              notifstud=` Hiring partner dengan id =${hiringPartnerId} menerima rescheduled interview yang anda ajukan`
+            }else{
+              notifstud=` Hiring partner dengan id =${hiringPartnerId} menolak rescheduled interview yang anda ajukan`
+            }
+            whereClause2={studentId,read:false,notifstud:{[Op.ne]:null}}
+            sockiomsgisinotif='isinotifstud'
+            sockiomsgnotif='notifstud'
+          }
+          notif.create({
+            hiringPartnerId,
+            studentId,
+            notif:notifhp,
+            notifstud,
+            read:0,
+            readstudent:0
+          }).then(()=>{
+            notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
+            .then((totalnotif)=>{
+              notif.findAll({where:whereClause2,order:[['createdAt', 'DESC']],limit:5})
+              .then((result1)=>{
+                req.app.io.emit(sockiomsgnotif,totalnotif)
+                req.app.io.emit(sockiomsgisinotif,result1)
+                return res.json({
+                  status: responseStatus.SUCCESS,
+                  message: 'Data updated !',
+                  result: {
+                    id: obj.id
+                  }
+                })
+              }).catch((err)=>{
+                return errorResponse(err, res);
+              })
+            }).catch((err)=>{
+              return errorResponse(err, res);
+            })
+          }).catch((err)=>{
+            return errorResponse(err, res);
+          })
+        }).catch(error => {
           return errorResponse(error, res);
         });
-    }).
-    catch(error => {
+    })
+    .catch(error => {
       return errorResponse(error, res);
     });
 });
