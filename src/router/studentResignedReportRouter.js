@@ -16,8 +16,10 @@ import {
   StudentHiredReport,
   StudentInvitation,
   StudentResignedReport,
-  User
+  User,
+  notif
 } from '../database/models';
+const Op = sequelize.Op;
 
 const router = express.Router();
 const hostName = config.HOSTNAME;
@@ -199,7 +201,8 @@ router.post('/', (req, res) => {
                   transaction: tr
                 }).then(() => {
                   return StudentInvitation.update({
-                    status: 'resigned'
+                    status: 'resigned',
+                    read:false
                   }, {
                     where: { id },
                     transaction: tr
@@ -210,13 +213,89 @@ router.post('/', (req, res) => {
               });
             });
           }).then(result => {
-            return res.json({
-              status: responseStatus.SUCCESS,
-              message: 'Data Saved !',
-              result: {
-                id: result.id
-              }
-            });
+            HiringPartner.findByPk(hiringPartnerId)
+            .then((result3)=>{
+              var notifhp=null
+              var notifstud=`anda resign dari ${result3.name} `
+              var whereClause2={studentId,readstudent:false,notifstud:{[Op.ne]:null}}
+              var whereClauseisi={studentId,notifstud:{[Op.ne]:null}}
+              var sockiomsgisinotif='isinotifstud'
+              var sockiomsgnotif='notifstud'
+              notif.create({
+                hiringPartnerId,
+                studentId,
+                notif:notifhp,
+                notifstud,
+                read:0,
+                readstudent:0
+              }).then(()=>{
+                notif.count({where:whereClause2})
+                .then((totalnotif)=>{
+                  notif.findAll({
+                    where:whereClauseisi,
+                    order:[['createdAt', 'DESC']],
+                    include: [
+                      {
+                        model: Student,
+                        as: 'student',
+                        attributes: [
+                          'slug',
+                          'name',
+                        ],
+                        include: [
+                          {
+                            model: User,
+                            as: 'user',
+                            attributes: [ 'profilePicture']
+                          }
+                        ]
+                      },
+                      {
+                        model: HiringPartner,
+                        as: 'hiringPartner',
+                        attributes: [
+                          'slug',
+                          'name',
+                        ],
+                        include: [
+                          {
+                            model: User,
+                            as: 'user',
+                            attributes: ['profilePicture']
+                          }
+                        ]
+                      }
+                    ],
+                    limit:5
+                  })
+                  .then((isinotif)=>{
+                    StudentInvitation.count({where:{status:['hired','rejected','resigned'],read:false,hiringPartnerId}})
+                    .then((totalreport)=>{
+                      req.app.io.emit('report',totalreport)
+                      req.app.io.emit(sockiomsgnotif,totalnotif)
+                      req.app.io.emit(sockiomsgisinotif,isinotif)
+                      return res.json({
+                        status: responseStatus.SUCCESS,
+                        message: 'Data Saved !',
+                        result: {
+                          id: result.id
+                        }
+                      });
+                    }).catch((error)=>{
+                      return errorResponse(error, res);
+                    })
+                  }).catch((err)=>{
+                    return errorResponse(err, res);
+                  })
+                }).catch((err)=>{
+                    return errorResponse(err, res);
+                })
+            }).catch((error)=>{
+              return errorResponse(error, res);
+            })
+            }).catch((err)=>{
+              return errorResponse(err, res);              
+            })
           }).
           catch(error => {
             if (suratResignPath) {

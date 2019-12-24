@@ -169,7 +169,6 @@ router.post('/', (req, res) => {
         startDate,
         salary
       } = req.body;
-      console.log(req.body)
       const offeringLetterPath = offeringLetter
         ? `${path}/${offeringLetter[0].filename}`
         : null;
@@ -226,7 +225,8 @@ router.post('/', (req, res) => {
               return StudentInvitation.update(
                 {
                   status: 'hired',
-                  updatedBy: 'hiring-partner'
+                  updatedBy: 'hiring-partner',
+                  read:false
                 },
                 {
                   where: { id },
@@ -248,41 +248,88 @@ router.post('/', (req, res) => {
             });
           })
           .then(result => {
-            var notifhp=null
-            var notifstud=`congrate hiring partner ${hiringPartnerId} offer you job `
-            var whereClause2={studentId,read:false,notifstud:{[Op.ne]:null}}
-            var sockiomsgisinotif='isinotifstud'
-            var sockiomsgnotif='notifstud'
-            notif.create({
-              hiringPartnerId,
-              studentId,
-              notif:notifhp,
-              notifstud,
-              read:0,
-              readstudent:0
-            }).then(()=>{
-              notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
-              .then((totalnotif)=>{
-                notif.findAll({where:whereClause2,order:[['createdAt', 'DESC']],limit:5})
-                .then((result1)=>{
-                  req.app.io.emit(sockiomsgnotif,totalnotif)
-                  req.app.io.emit(sockiomsgisinotif,result1)
-                  return res.json({
-                    status: responseStatus.SUCCESS,
-                    message: 'Data Saved !',
-                    result: {
-                      id: result.id
-                    }
-                  });
+              HiringPartner.findByPk(hiringPartnerId)
+              .then((result4)=>{
+                var notifhp=null
+                var notifstud=`congrate ${result4.name} offer you job `
+                var whereClause2={studentId,readstudent:false,notifstud:{[Op.ne]:null}}
+                var sockiomsgisinotif='isinotifstud'
+                var sockiomsgnotif='notifstud'
+                notif.create({
+                  hiringPartnerId,
+                  studentId,
+                  notif:notifhp,
+                  notifstud,
+                  read:0,
+                  readstudent:0
+                }).then(()=>{
+                  notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
+                  .then((totalnotif)=>{
+                    notif.findAll({
+                      where:whereClause2,
+                      order:[['createdAt', 'DESC']],
+                      include: [
+                        {
+                          model: Student,
+                          as: 'student',
+                          attributes: [
+                            'slug',
+                            'name',
+                          ],
+                          include: [
+                            {
+                              model: User,
+                              as: 'user',
+                              attributes: [ 'profilePicture']
+                            }
+                          ]
+                        },
+                        {
+                          model: HiringPartner,
+                          as: 'hiringPartner',
+                          attributes: [
+                            'slug',
+                            'name',
+                          ],
+                          include: [
+                            {
+                              model: User,
+                              as: 'user',
+                              attributes: ['profilePicture']
+                            }
+                          ]
+                        }
+                      ],
+                      limit:5
+                    })
+                    .then((result1)=>{
+                      StudentInvitation.count({where:{status:['hired','rejected','resigned'],read:false,hiringPartnerId}})
+                      .then(totalreport=>{
+                        req.app.io.emit('report',totalreport)
+                        req.app.io.emit(sockiomsgnotif,totalnotif)
+                        req.app.io.emit(sockiomsgisinotif,result1)
+                        return res.json({
+                          status: responseStatus.SUCCESS,
+                          message: 'Data Saved !',
+                          result: {
+                            id: result.id
+                          }
+                        });
+                      }).catch((err)=>{
+                        return errorResponse(err, res);
+                      })
+                    }).catch((err)=>{
+                      return errorResponse(err, res);
+                    })
+                  }).catch((err)=>{
+                    return errorResponse(err, res);
+                  })
                 }).catch((err)=>{
                   return errorResponse(err, res);
                 })
-              }).catch((err)=>{
-                return errorResponse(err, res);
+              }).catch((error)=>{
+                  return errorResponse(error, res);
               })
-            }).catch((err)=>{
-              return errorResponse(err, res);
-            })
           })
           .catch(error => {
             return errorResponse(error, res);

@@ -53,7 +53,7 @@ module.exports = {
       },
       readstudent:{
         allowNull: false,
-        type: DataTypes.BOOLEAN,
+        type: Sequelize.BOOLEAN,
         defaultValue: false
       },
       updatedBy: {

@@ -104,7 +104,6 @@ app.use('/student-invitations-notif',HiringPartnernotifRouter)
 //socket.io
 io.on('connection',socket=>{
   console.log('User Connected')
-  // io.emit('konek','dino ganteng')
   socket.on('disconnect',()=>{
     console.log('user disconnected')
   })

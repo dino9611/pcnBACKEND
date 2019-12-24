@@ -22,6 +22,14 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   notif.associate = function(models) {
     // associations can be defined here
+    notif.belongsTo(models.Student, {
+      foreignKey: 'studentId',
+      as: 'student'
+    });
+    notif.belongsTo(models.HiringPartner, {
+      foreignKey: 'hiringPartnerId',
+      as: 'hiringPartner'
+    });
   };
   return notif;
 };

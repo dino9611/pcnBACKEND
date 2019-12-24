@@ -21,32 +21,70 @@ router.get('/',(req,res)=>{
     const {  hiringPartnerId,studentId } = req.query;
     var whereClause={status:['new','interview_accepted','interview_rejected','rescheduled']}
     var whereClause2={}
+    var whereClause3={}
     var whereClauseisi={}
     if(hiringPartnerId){
       whereClause={...whereClause,hiringPartnerId,read:false}
+      whereClause3={status:['hired','rejected','resigned'],read:false,hiringPartnerId}
       whereClause2={hiringPartnerId,read:false,notif:{[Op.ne]:null}}
       whereClauseisi={hiringPartnerId,notif:{[Op.ne]:null}}
-
     }else{
       whereClause={...whereClause,studentId,readstudent:false}
       whereClause2={studentId,readstudent:false,notifstud:{[Op.ne]:null}}
       whereClauseisi={studentId,notifstud:{[Op.ne]:null}}
-
     }
     StudentInvitation.count({ where: whereClause }).then(total => {
         notif.count({where:whereClause2,order:[['createdAt', 'DESC']]})
         .then((totalnotif)=>{
-          notif.findAll({where:whereClause2,order:[['createdAt', 'DESC']],limit:5}).then(result=>{
-            res.json({
-              status: responseStatus.SUCCESS,
-              message: 'Get data success !',
-              total,
-              totalnotif,
-              isinotif:result
-            });
-
+          notif.findAll({
+            where:whereClauseisi,
+            order:[['createdAt', 'DESC']],
+            limit:5,
+            include: [
+              {
+                model: Student,
+                as: 'student',
+                attributes: [
+                  'slug',
+                  'name',
+                ],
+                include: [
+                  {
+                    model: User,
+                    as: 'user',
+                    attributes: [ 'profilePicture']
+                  }
+                ]
+              },
+              {
+                model: HiringPartner,
+                as: 'hiringPartner',
+                attributes: [
+                  'slug',
+                  'name',
+                ],
+                include: [
+                  {
+                    model: User,
+                    as: 'user',
+                    attributes: ['profilePicture']
+                  }
+                ]
+              }
+            ]
+          }).then(result=>{
+            StudentInvitation.count({where:whereClause3})
+            .then((resultreport)=>{
+              res.json({
+                status: responseStatus.SUCCESS,
+                message: 'Get data success !',
+                total,
+                totalnotif,
+                isinotif:result,
+                totalreport:resultreport
+              });
+            })
           })
-
         })
       });
 })

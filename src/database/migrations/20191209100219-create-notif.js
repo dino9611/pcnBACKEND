@@ -17,6 +17,9 @@ module.exports = {
       notif: {
         type: Sequelize.STRING
       },
+      notifstud:{
+        type:Sequelize.STRING
+      },
       hiringPartnerId: {
         allowNull:false,
         type: Sequelize.INTEGER
