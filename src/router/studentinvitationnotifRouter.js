@@ -89,7 +89,6 @@ router.get('/',(req,res)=>{
       });
 })
 router.put('/',(req,res)=>{
-
   const{  
     hiringPartnerId,
     studentId
