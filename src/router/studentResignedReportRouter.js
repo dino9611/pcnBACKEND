@@ -271,7 +271,7 @@ router.post('/', (req, res) => {
                   .then((isinotif)=>{
                     StudentInvitation.count({where:{status:['hired','rejected','resigned'],read:false,hiringPartnerId}})
                     .then((totalreport)=>{
-                      req.app.io.emit('report',totalreport)
+                      // req.app.io.emit('report',totalreport)
                       req.app.io.emit(sockiomsgnotif,totalnotif)
                       req.app.io.emit(sockiomsgisinotif,isinotif)
                       return res.json({
@@ -301,7 +301,6 @@ router.post('/', (req, res) => {
             if (suratResignPath) {
               fs.unlinkSync(`./src/public${suratResignPath}`);
             }
-
             return errorResponse(error, res);
           });
       } catch (error) {

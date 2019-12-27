@@ -119,18 +119,44 @@ router.get('/', pagingParams, (req, res) => {
     order: [['updatedAt', 'DESC']]
   })
     .then(result => {
-      StudentHiredReport.count({ where: whereClause }).then(total => {
-        res.json({
-          status: responseStatus.SUCCESS,
-          message: 'Get data success !',
-          result: result || [],
-          total
+      if(hiringPartnerId){
+        var whereClause3={status:['hired','rejected','resigned'],read:false,hiringPartnerId}
+        StudentInvitation.update({
+          read:true
+        },
+        {
+          where:whereClause3
+        }).then(()=>{
+          StudentInvitation.count({where:whereClause3}).then((totalreport)=>{
+            req.app.io.emit('report',totalreport)
+            StudentHiredReport.count({ where: whereClause }).then(total => {
+              res.json({
+                status: responseStatus.SUCCESS,
+                message: 'Get data success !',
+                result: result || [],
+                total
+              });
+            });
+          }).catch((error)=>{
+              return errorResponse(error, res);
+          })
+        }).catch((error)=>{
+            return errorResponse(error, res);
+        })
+      }else{
+        StudentHiredReport.count({ where: whereClause }).then(total => {
+          res.json({
+            status: responseStatus.SUCCESS,
+            message: 'Get data success !',
+            result: result || [],
+            total
+          });
         });
-      });
+      }
     })
     .catch(error => {
       return errorResponse(error, res);
-    });
+    })
 });
 
 router.get('/:id', (req, res) => {
